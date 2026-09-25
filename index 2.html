@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>X8 TIME CHECK | 出退勤</title>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlg4IFRJTUUgQ0hFQ0siLCAic2hvcnRfbmFtZSI6ICJUSU1FIENIRUNLIiwgImRlc2NyaXB0aW9uIjogIlg4IOWHuumAgOWLpOODgeOCp+ODg+OCryDigJQg44Kr44Oh44Op44Gn5pys5Lq656K66KqN44GX44Gq44GM44KJ5Ye65Yuk44O76YCA5Yuk44KS6KiY6YyyIiwgInN0YXJ0X3VybCI6ICIuIiwgInNjb3BlIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImJhY2tncm91bmRfY29sb3IiOiAiIzEzMTAxOSIsICJ0aGVtZV9jb2xvciI6ICIjMTMxMDE5IiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTUFBQUFEQUNBWUFBQUJTM0d3SEFBQUhVVWxFUVZSNG5PM2QzZEVUT1JDRjRXWnJBNkNLSzdJZ0NxSWhIS0loQ3JMZ2lpb3lZQzlnQ3VPMVBaSkczVHJkZXA5citCaXJ6NUhtOHc4MkF3QUFBQUFBQUFBQUFBQUFLT1BONmd1NDR0M2I5ejlYWHdOKytmN2pXOG9zcGJsb3dwNVBobEpJWHlDaHIwTzFESklYUmZEclVpdUMxTVVRL0gyb0ZFSGlJZ2ordmxZWFllay9UdkJ4V0ZXRWYxYjhvMmFFSDM5YmxZZncxaEY4bklrOERVSlBBTUtQRnBFNUNTc0E0VWVQcUx5RUZJRHdZMFJFYnR3TFFQaHhoWGQrWEF0QStER0RaNDdjQ2tENE1aTlhubHdLUVBqaHdTTlgwd3RBK09GcGRyNm1Gb0R3SThMTW5DMTdLd1NnWU5wTHp1eitqMzM1L09IUzMvLzQ2ZXVVNjZob3hsc21waFNBOEY4UGVpK0s4Y3ZWRWxDQVFkR0JQN05ySVpZWFlLZndxNFgrbWQzS2NLVUVGT0JFbHRBL3MwTVpsaFdnY3ZpekIvOWU5U0tNbG9BQzNLa1cvSHRWaXhCZWdHcmhyeDc4ZXhXTE1GS0M3UXZnSGZ5clFWTy9QaVZoQmFnUWZvOWdSWVVwODdWNzZ5M0JkZ1dZR1I2VjBGUjhUS01vd0FzemdxSWVrQjBlNHl2dUJkZzEvTmxDc2R2anZkVlRndklGdUJLRXpDRzR0ZHNhVUlEZlJnZWZjZWd0ZGxrUENtQmp3ODQyNkZIVjE2YW5BQ1UvRUZOOXdGZU5QTmFxTHhSMm5RRHF1ei9CNzFkMXpWcFBnVEluUU5WQmV0djlOQ2h4QXZRT2hPQS9WbWtkdHprQktnMXR0ZDYxcVhBU3BDNEE0Wjl2dHhMOHUvb0NJaEQ4UHNkNlpROTNpN1FuUU90d0NQKzQxclhMWEpTVUJTRDhjYXFYSUYwQkNIKzh5aVZJVlFEQ3YwN1ZFcVFxUUF2Qzc2ZmkycVlwUUxhZFpXZVpacFdpQU56NjZLaDJLeVJmQU1LdnAxSUo1QXZRZ3ZESHE3TG0wZ1hJc0lQZ05mVVpTaGVnUlpXZEtLTUtheTliZ0phZG84SUFzbXVaZ2ZJcElGc0FJSUprQWRqOWM4bDhDa2dXNEF6aDE1TjFKbklGVU4wcHFvdFlkOFhaeWhYZ1ROYWRSdGtSekIzL08wV3BBaWp1RUpWOStmd2hmTTNWWml4VmdETVpkeGhWejRLNDJ5a2dVd0MxbmFHcWxsM2ZleFpLczVZcEFQenh4c0wvUzFPQW5ZYmlvZlcxbFJucm5HbFdFZ1ZRT2hLcmFmMUZOenEwS2pPWEtNQ1pURHVLa3NoZC85SFB6U0JGQWRCUGNkZFh0THdBS2tmaEk4clg5b3pxTGM4akN1dTd2QUJuVmc5cXhZdEZvMWJlOGp6N3Q5VEpGMkNWK3pBcGx5RFRycStHQW5SUVBBMTRidithcFFWUUM5T2g1WlZTaFd0WHUrVVpzWG9kcFU4QTVjR1pyU3RDcGxzZWhXdDRSYm9BSzR3RU9ySUVGWFo5SlZ0OFFVYVAwUytIT1A2OFYvQzQxL2ZCQ2ZERWFKQThib3NJdng5T2dCZXVmRlhRckJNaHk3MStWc3UrSnZWc3NJcERIZDNaUGIrTFYzR2RIb21lZCt2WHBISUNkSWo2L1lCZFB3NEZHUER4MDlmTHQwV1AvbjdyenlYODgvQkw4S0FyVHpWZStUd3U0WitMRStDaXFPL1VKZmcrT0FFbThYenhpZkQ3b1FDVHpRNHI0ZmRGQVJ6cytPSHlyQ2lBSTk2VG80OENCS0FFdWlnQXRrWUJndlNlQXB3YU1TaEFvTlpRRS80NEZDRFlXYmdKZnl3S3NNQ3prQlArZUx3VlloSENybUhaQ1hBV2dOWC9Xd0RtVWY3c0I3ZEEyQm9Gd05Zb0FMWkdBYkExNlFMd2kzQis2ak5jV2dDZUNzVHFERWlmQUlBM0NvQ3R5UmRBL1I0U3oyV1kzZklDckw0SHhEb0tzMTllQUdDbEZBWEljSlRpYjFsbUpsRUFoYU1Rc1ZSbUxsR0FGbGwyRk9TYVZab0NBQjVrQ3FCeUpNS2YwcXhsQ3RBaTA5RzZxMnd6a2lxQTBzNEFIMm96bGlwQWkydzd6RTR5emthdUFHbzdCT1pSbksxY0FWcGszR21xeXpvVHlRSzA3QlJaRjd5aXpGL3RKRmtBSUlwc0FUZ0Zjc2k4KzVzSkY2QVZKVmlud3RwTEYwQjU1MEFiOVJsS0Y2QlZoWjBvbXlwckxsK0ExaDJreWtBeWFGMXI5ZDNmTEVFQnpDaUJra3JoTjB0U0FMTThDNHBjczBwVGdGYWNBbjRxcm0ycUFuQXJ0RTYxVzU5RHFnS1lVWUlWcW9iZkxHRUJ6Q2hCcE1yaE4wdGFBRE5LRUtGNitNMDIrWks4WTVDWkJ4VnBwMDBqN1FsZzFoL29uUVk3cW5lTnNtOHFxUXRnUmdsbTJpMzhabVp2ZXY3d3U3ZnZmM3BkeUZVandhNHd3QmtxcnQzM0g5K2FzcDMrQkRpTURJVFRvR2I0ZTVRNUFXN3RQdFFXMWRmSTVRUm8vYUdyY1JxOFJ2ai82QTUwbGxQQWJEelVtWWJkWTVmMW9BQTNydXpzMlFiL3pHNXJRQUVldUhxTGt5MEl1ejNlV3hUZ2lSbjMrZXJCMk9FeG5uRXRnQmtsT0tnRXBlSmpHdFg3Uk0xMkJUaDRQT3NURlo3TTErNk5BblR5ZnZyemFyRFVyMDlOU0FITWFwWEFiSy9YQWN6cUJkOXM3SFVxQ25DbmVoRXFCdjhRV2dDenVpVXdxMWVFeXNFM0czK1hBZ1U0a2IwSTFZTi9XRklBc3oxS2NNaFNobDFDZjdqeUhqVUtNRWl0REx1Ri90YlNBcGp0VzRKYjBZWFlPZkMzcnI1RG1RSTQyL2s5T1JFa0NtQkdDUkJ2eHVkVHBuMGtNc3VIWlZERHJMeVYrVXd3TUdKcUFUZ0ZFR0ZtenFhZkFKUUFubWJueStVV2lCTEFnMGV1M0g0SG9BU1l5U3RQcnI4RVV3TE00SmtqOTJlQktBR3U4TTVQeU5PZ2xBQWpJbklUOWpvQUpVQ1BxTHlFdmhCR0NkQWlNaWZMQXNsN2gzQnZ4UWE1N0swUW5BYTR0U29QRWlIa05Oalg2bzFRb2dBSGlyQ1AxY0UvU0Z6RVBZcFFsMHJ3RDFJWGM0OGkxS0VXL0lQa1JUMUNHZkpSRGYwdCtRdDhoVkxveUJCMkFBQUFBQUFBQUFBQUFNQU8vZ1B3ODVOdzhjWGt1UUFBQUFCSlJVNUVya0pnZ2c9PSIsICJzaXplcyI6ICIxOTJ4MTkyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIiwgInB1cnBvc2UiOiAiYW55In0sIHsic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBZ0FBQUFJQUNBWUFBQUQwZU5UNkFBQVdTMGxFUVZSNG5PM2R6WEVreFJZRzBJUjRCaERCQ2krd0Ftc3dCMnV3WXJ4Z1JjUjR3RnRBZzZScFNWWGRsWm4zNTV6TjJ6MzFkR1YrOTZ1c2toZ0RBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDZTlkM3VEMEFzUC83dzAxKzdQd013ejU5Zi81RDdqREVVZ0hZTWVPQWpDa0lmTG5SaGhqMXdCYVdnSmhlMUVBTWZXRUVocU1GRlRNekFCeUpRQ0hKeTBaSXg5SUhJbElFOFhLZ0VESDBnSTJVZ05oY25LRU1mcUVRWmlNY0ZDY2JnQnlwVEJPSndJUUl3OUlHT2xJRzlmUGtiR2Z3QWlzQXV2dlFOREg2QWJ5a0NhL215RnpMNEFUNm5DS3poUzE3QTRBYzRUeEdZeTVjN2tjRVA4RHhGWUk3dmQzK0FxZ3gvZ0d2STB6bTBxb3RacUFEek9BMjRqaS95SWdZL3dEcUt3UE04QXJpQTRRK3dsdHg5bmdiMUJBc1FZRCtuQVk5eEF2QWd3eDhnQm5uOEdBWGdBUlliUUN4eStUekhKaWRZWUFEeGVTUndqQk9BZ3d4L2dCems5VEVLd0FFV0UwQXVjdnR6amtrK1lBRUI1T2VSd0gxT0FONWgrQVBVSU0vdlV3RHVzRmdBYXBIcjMxSUEzckJJQUdxUzc2OHBBQzlZSEFDMXlmbi9LQUQvc0NnQWVwRDNmMU1BaHNVQTBJM2NWd0FzQW9DbXV1ZC82d0xRL2VJRGROZDVEclF0QUowdk9nRC82VG9QV2hhQXJoY2JnUHM2em9WMkJhRGpSUWJnYzkzbVE2c0MwTzNpQW5CT3B6blJwZ0IwdXFnQVBLN0x2R2hSQUxwY1RBQ3UwV0Z1bEM4QUhTNGlBTmVyUGo5S0Y0RHFGdytBdVNyUGtkSUZBQUM0cjJ3QnFOemFBRmluNmp3cFdRQ3FYaXdBOXFnNFY4b1ZnSW9YQ1lEOXFzMlhjZ1VBQVBoY3FRSlFyWjBCRUV1bE9WT21BRlM2S0FERVZXWGVsQ2dBVlM0R0FEbFVtRHNsQ2dBQWNNNTN1ei9Bc3lxME1MakM3Ny85dk9Ubi9QTHJseVUvQnpMNDgrc2ZhZWRvMmc4K2h1RlBENnNHKzlVVUJicklXZ0pTZnVnYkJZQktzZzc2c3hRRHFsRUFGalA4eWFyTG9EOUxNU0N6akNVZzNRZStVUURJd3NCL2pFSkFKZ3JBSW9ZL2tSbjRjeWdFUkpldEJLVDZzR01ZL3NSajRPK2hFQkJScGhLUTVvUGVLQURzWnVESHBCQVFnUUl3aWVIUExvWitMc29BTzJVcEFTays1STBDd0VxR2ZnM0tBS3NwQUJjei9GbkIwSzlOR1dDVkRDVWcvQWU4VVFDWXllRHZSUkZnTmdYZ0lvWS9NeGo2aktFTU1FLzBFaEQ2dzkwb0FGeko0T2NlUllDcktRQlBNdnk1Z3FIUEdjb0FWNGxjQXNKK3NCc0ZnR2NZL0R4REVlQlpDc0NEREg4ZVpmQnpKVVdBWjBRdEFTRS8xSTBDd0ZrR1B6TXBBanhDQVhpQUFzQlJCajhyS1FLY29RQ2NaUGh6aE1IUFRvb0FSMFVzQWVFKzBJMEN3RWNNZmlKUkJQaU1BbkNRNGM5N0RINGlVd1Q0U0xRU0VPckQzQ2dBdkdYd2s0a2l3RDBLd0FFS0FDOFovc2ZOSGp5dXhYRktBRzhwQUo4dy9Ma3hiRjdMTWxCY3Q5ZXlYRGZXaUZRQ3dueVFHd1dBN2dPazZzQndYYi9zL2dnRW9BQjhRQUhvcmR1UTZENFVYRys2VVFEZVlmajMxV0VRQ1A5anJBV3FpMUlDUW55SUd3V2duOHBoTCtTdllZMVFqUUp3aHdMUVM4VmdGK2h6V1ROVW9BQzhZZmozVVMzRUJmZ2UxaEdaUlNnQjJ6L0FqUUxRUTVYUUZ0YXhXRmRrb3dDOG9BRFVsejJraFhNTzFoa1pLQUF2S0FCMVpRNWtZWnlidFVkVUNzQS9EUCs2c2dhdzhLM0ZPaVNpM1NWQUFXQ2FqS0VyY0d1ekpvbEVBUmdLUURYWlFsYkE5bVNkc3BzQ01CU0FTaktGcWtCbERHdVdmZG9YQU1PL2ppeEJLa1M1eC9wbGg1MGxRQUhnYVlLVFNxeG5WbElBU0N0RFdBcEtIbUZ0czRJQ1FFclJBMUk0Y2dYcm5Ka1VBTktKSElvQ2tSbXNlV2JZV1FDKzMvV0R4ekQ4c3hLRWRCUjViVVhlazN4czV4emNlZ0tnQU9RVE5XZ2loelAxMkFkY2FkY3BnQUxBSVFJUHZtVmZjSVZkQldEckl3QnlFSEp3WDlRMUdIWFBFb3NUQUQ0VU1VaWloaTY5MlNzOHlna0E0UWcwT0M3aTJveTRoNG5EQ1FCM1JRdU9pT0VLNzdGL09NTUpBR0VJTDNoT3REVWJiVThUdzdZVEFIZi9NVVVLaW1naENvK3dwemhpeHltQUV3RCtKYWpnZXBIV2NxUTl6bjRLQUdPTVdNRVFLVERoQ3BIV2RLUzl6bDRlQVJBbUVDS0ZKTXhpdjNHUFJ3QXNKNHhnclNoclBjcmVaeDhGb0xFb0FSQWxFR0dWS0dzK1NnYXdoMGNBVFVYWStGRkNFSGF5RnhuREl3QWFFVGp3TjN1QlhSU0FobmJmY1FnOGVHMzNudGlkQ2V5aEFEU3plNlB2RGpxSWF2ZmUySjBOcktjQU5MSjdnKzhPT0lodTl4N1puUkdzcFFBMHNYdGo3dzQyeUdMM1h0bWRGYXlqQURTd2UwUHZEalRJWnZlZTJaMFpyT0hYQUl2YnVaRjNoeGhVWUEvMzROY0FLVU53d0RYc0pXWlJBQXJiZGVjZ3NPQmF1L2FVUndHMUtRQkZHZjVRaXhMQTFSU0FnZ3gvcUVrSjRFb0tBSmN3L0dFTmU0MnJLQURGN0dqcUFnblcyckhubkFMVW93QVVZb01DTThtWVdoU0FJanozaDE2OEQ4Q3pGQUFlWnZqRFh2WWd6MUFBQ3ZEY0gvcnlQZ0NQVWdDU00vd0JKWUJIS0FDSkdmN0FqUkxBV1FvQWh4bitFSnM5eWhrS1FGS3JtN2RnZ1J4VzcxV25BSGtwQUFuWmNFQWtNaWtuQllCUHVmdUhYT3haamxBQWtuSDBEeHpoVVFDZlVRQjRsK0VQdWRuRGZFUUJTRVREQmlLVFVia29BRWs0K2djZTRWRUE3MUVBK0liaEQ3WFkwOXlqQUNTd3NsRUxDcWhwNWQ1MkNwQ0RBZ0FBRFNrQXdibjdCNjdpRklDWEZJREFESC9nYWtvQU53b0FBRFNrQUFUbDdoK1l4U2tBWXlnQTdSbiswSk85andJUWtNWU1WQ0xUWWxJQUduTUhBTDNKZ040VWdHQldOV1ViSHhoalhSWTRCWWhIQVFDQWhoU0FRTno5QXpzNEJlaEpBUUNBaGhTQUlOejlBenM1QmVoSEFXakU4SWU5b2c4L0dkR0xBaEJBOUZBQW5uZmI1L2E3N3lBS0JhQUp6UjcyK1AyM24xTU5QRm5SaHdLd1dhWmdBTTU1YjMvYjk3NkRDQlNBQmpSNldPdklYWC9rQVNnemVsQUFOb29jQU1CajdPdmpmRmQ3S1FERmFmS3d6dG1CRm5rQXlvNzZGQUNBSnozem9sL2tFa0J0Q3NBbUt6YTlCZy96WGJHWG81YUFGUmtTOWQvZXdmOTJmd0NBakF3dXNuTUNzSUc3ZjhodHhoNk9XaWljQXRTbEFBQ2NNSE5ZR1lTc3BBQVU1TzRmcnBmdEwvcGRTYWJVcEFBczFqVkFJTE9WKzdaclJuVDlkKy9rSlVDQWQrd1lTdTYyV2VXN1hULzR4eDkrK212WHo5N0Z5MytReCtyaG4ySHZ5ckI1L3Z6NngvSjU3QkVBd0J1R1B4MTRCRkNJRUlIbkdQd2YrK1hYTDU3VkYrSUVZQkdiQm1Jei9HT1FsZXNvQUVVSUUzak1qbC92eTd4Zk0zOTJYdk1JQUdqTDRLY3pKd0FMT05LQ1dOejF4eVl6MTFBQUNoQXNjTnlPd1Y5dGoxYjc5M1NsQUFCdHVPdUgveWdBa3puS2d2MGMrZWNqTytkVEFKSVRNczhUTkxVNThwK2p3Nyt4T3I4RlFHdTM0WEQ3WDZGV2g3L2pEeDl6QWdBdk9BMm93VjAvZk01L0RHaWkyU0VrY0o3ejJmWHgvZWJrV2Y5YWN1NGFPLzVqUUI0QndEczhGc2pGa1QrY293RFEwcGxob1FqRTU2NGZ6dk1PUUZJQzZIR1BEZ3Z2QjhUajEvdjI4MzNrcFFCTVlsalV0R1BnY0o4WC9YcXczK1pSQUdqbHFqQlJCUFp5MXcvUDh3NUFRc0lvRHU4SHJHWHd4L1RMcjE4VTRvU2NBTkRHeklBU2Z2TVovbkF0QldBQ3d5Q2VGZGZFWTRFNXZPaUhmVFdIUndCd01ZOEZybVB3d3p4T0FKSVJVT2Z0dW50dzEvSWN3ejhYMzE4K1RnQmdJcWNCNXhuOHNJWVRnSXU1NjRzbHl2WHdmc0F4aGovdnNYK3U1d1NBc2lJR2hoT0IrL3dkZjFqUENRQnNFTEdjN09JditzRWVDa0FpUXV1NERBUFdZd0ZIL3RYNGZuUHhDQUEyNi9oWXdPQ0gvWndBVUU3V3UrcXNuL3Nzd3g5aStHN1hELzd4aDUvKzJ2V3paNWtkYklMc25Nd0R0ZUsxOXFKZkQzTHdNWDkrL1dQNVBIWUNRRm1aZzZMYSt3RmU5SU40RklBa2hObGpzZytDQ2tYQWtYOHZ2djg4dkFSSUM3ZFF5anBNZi8vdDUzVEJhdkJEYkU0QWFDWHppVUNtMHdEREgrSlRBR2dwODhDSVhBVDhwM3NoRDc4RmNCRnZ2dVlWZFpnZUZXVnRHUHpjeU1Qei9CWUFiSkQ1c2NBWSt3dU11MzdJeVFuQVJXWUdvTEJiYS9kQWZjYnF0V0x3OHg2WmVJNFRBQWdnYzdpc3ZCczMvQ0UzQlFEdThGamc0Lzl2d3gveTgzY0E0QU9aLzM3QWpQL0lrTUVQZFNnQWNNQXZ2MzVKV1FMR2VGMEVqdndiN2cxZGY4Y2Y2bEVBNEtETXB3RmpIUC9jYjA4TzNQVkRUUW9BbkpTOUNCemxyaDlxOHhJZ1BDajdpNExSK0M1aExRWGdBdFh2QlBtWXdmVWNSWXF6Wk80MUZJRGdCR01PaHRoamZHZDF1YmJ4ZVFjQUx0VGwvWUJuR1E2d254TUFtTUNKd1B0OEx4Q0RBZ0FUR1hiL1VZb2dGZ1VBSmpQNEZDR0lTQUdBUmJvV2dZNy9ac2hBQVlERnVnekVyb1VIc2xBQVlJUHF3N0h5dncycThHdUFzRkcxWHhzMCtDRVBKd0FRUUlVVGdleWZIN3BSQUNDUXJFTTA2K2VHemhRQUNLYkNhUUFRbndJQVFTa0N3RXdLQUFTbkJBQXpLQUNRZ05NQTRHb0tBQ1NpQ0FCWFVRQWdJU1VBZUpZQ0FFbEZLUUZSUGdkd2pnSUFBQTBwQUpEWTdydnYzVDhmZUp3Q0FBQU5LUUNRM0s2N2NIZi9rSnNDQUFBTktRQlF3T3E3Y1hmL2tKOENFRnlWLzA0ODg2MGF5b1kvUjhpdStCU0FDd2hFb3BpOUZxMTFJckFPcjZFQVFER3p3bEhvUWkzLzIvMEJnT3ZkaHZVVng3QUdQOVNrQUVCaHp4UUJneDlxVXdDZ2dUTkZ3T0NISGhRQWFNUndCMjY4QkFnQURTa0FBTkNRQXBDQVA2Z0JaQ0t6Y2xBQUFLQWhCZUFpWHE0Q21FL1dYa2NCQUlDR0ZBQUFhRWdCQUlDR0ZJQWt2RlVMWkNDcjhsQUFBS0FoQmVCQzNrNEZtRWZHWGtzQkFJQ0dGQUFBYUVnQlNNVExOVUJrTWlvWEJRQUFHbElBQUtBaEJlQmkzbElGdUo1c3ZaNENBQUFOS1FESmVNa0dpRWcyNWFNQUFFQkRDc0FFbmxVQlhFZW16cUVBQUVCRENrQkNuclVCa2Npa25CUUFBR2hJQVpqRU15dUE1OG5TZVJTQXBCeTVBUkhJb3J3VUFBQm9TQUVBZ0lZVWdJbG1QN3R5OUFic05EdURQUCtmU3dFQWdJWVVBQUJvU0FGSXptTUFZQWZaazU4Q01KbG5XQURueWM3NUZBQUFhRWdCS01CUkhMQ1N6S2xCQVZqQVVSYkFjVEp6RFFVQUFCcFNBSXB3SkFlc0lHdnFVQUFXY2FRRjhEbFp1WTRDVUlobURzd2tZMnBSQUFDZ0lRVmdvUlZIV3hvNk1NT0tiSEg4djVZQ0FBQU5LUUNMYWJnQTM1S042eWtBQlhrTUFGeEpwdFNrQUFCQVF3ckFCbDRHQkxMdzhsOWRDZ0FBTktRQWJPSVVBSWpPM1g5dENnQUFOS1FBRk9jVUFIaUU3S2hQQWRqSTBSZlFtUXpjU3dGb1FKTUh6cEFaUFNnQW0ybkFRRWV5Yno4Rm9BbU5IamhDVnZTaEFBU2dDUU9keUx3WUZJQkdOSHZnSXpLaUZ3VWdpRldOMkFZSDdsbVZEZTcrNDFBQUFLQWhCU0FRcHdEQUR1NytlMUlBQUtBaEJTQVlwd0RBU3U3KysxSUFHbE1Db0RjWjBKc0NFSkNtREZRaTAySlNBSnB6QndBOTJmc29BRUd0Yk15Q0FIcFp1ZWZkL2NlbEFBQkFRd3BBWUU0QmdLdTUrK2RHQVFoT0NRQ3VZdmp6a2dJQUFBMHBBQWs0QlFDZTVlNmZ0eFFBdnFFRVFDMzJOUGNvQUVtc2J0UUNBMnBZdlpmZC9lZWhBQ1JpWXdHUnlhaGNGQURlNVJRQWNyT0grWWdDa0l4SEFjQVJqdjc1akFMQXA1UUF5TVdlNVFnRklDRk5HNGhFSnVXa0FDVGxVUUJ3ajZOL2psSUFPRXdKZ05qc1VjNVFBQkxiMGJ3RkRNUzBZMis2Kzg5TkFVaE9DUUFNZng2aEFCU2dCRUJmaGorUFVnQjRtQklBZTltRFBFTUJLR0pYSXhkQXNNZXV2ZWZ1dnc0Rm9CQWJFNWhKeHRTaUFCVGpmUUNvejNOL3JxQUFjQWtsQU5hdzE3aUtBbENROXdHZ0pzLzl1WklDVUpRU0FMVVkvbHhOQVNoTUNZQWFESDltVUFDWVFnbUFhOWhMelBMZHJoLzg0dzgvL2JYclozZXpPMERjUmNCNTltMHZmMzc5WS9rOGRnTFF3TzZOdkR2SUlKdmRlMlozWnJDR0F0REU3ZzI5TzlBZ2k5MTdaWGRXc0k0QzBNanVqYjA3MkNDNjNYdGtkMGF3bGdMUXpPNE52anZnSUtyZGUyTjNOckNlQXREUTdvMitPK2dnbXQxN1luY21zSWNDd0JhN0F3K2lzQmZZeGE4Qk5oWWxlTng5MEpIOXgwdCtEWkNsb216OEtFRUlxMFJaODFFeWdEMFVnT2FpQkVDVVFJVFpvcXoxS0h1ZmZUd0NZSXdSSjVUR0VFelVaSS94RVk4QTJDWlNJRVFLU3JoQ3BEVWRhYSt6bHdMQXZ5SUZRNlRBaEdkRVdzdVI5amo3ZVFUQU55SUYxaGhDaTV6c0k4NW85UWhneHorV1k2SUZSYlFnaGM5RVc3UFI5alN2N1pxSFc0ZXdVNERZb29YWUdJS00yT3daSHJHckFIZ0hnSGRGREk2SUFRdGp4RnliRWZjd2NUZ0I0Rk1SZzIwTTRVWU05Z2ZQY2dKQVdGR0RKR3J3MGtmVU5SaDF6eEtMRXdCT0VYaGdIM0F0THdHU1J0VHdHME1BTXBlMXp3d2VBWkJHNUtDSkhORGtGbmx0UmQ2VHhMWDlkL0dkQXVRVk9SREhFSXBjd3pwbnBwMS9FMGNCNENuUnczRU1BY2xqckcxV1VBQklMVU5RamlFc09jWjZaaVVGZ0JJRUo1bFp2K3lnQUZCR2xoQWRRNUR5TjJ1V25Wb1hnREdVZ0dveUJlb1lRclVyNjVUZGR2OUg4UlFBcHNrV3NHTUkyZXFzU1NKUkFJWUNVRm5Hd0IxRDZGWmpIUktSQWpBVWdPcXlodThZQWpnN2E0L0lGSUIvS0FIMVpRN2pNUVJ5RnRZWkdld2UvbU1vQUN5V1BaeHZoSFFzMWhYWktBQXZLQUI5VkFuckc2RzloM1ZFWmdyQUN3cEFQOVVDZkF3aFBwczFReFVLd0J0S1FEOFZBLzFHc0YvREdxR2FDTU4vREFXQUlDcUgvSTJ3UDhaYW9Eb0Y0QTRGZ0E3aC8xTDNRZUI2MDVFQzhBNGxnRzVENGEycVE4SjEvYkw3SXhCQWxPRS9oZ0pBWU4wSHhsdFpCb2pyOWxxVzY4WWFDc0FIRkFEZU1sQ09tejFzWEl2akRIN3VVUUErb1FUd2xzRkRKb1kvOTBRYS9tTW9BQ1NqQ0JDWndjOUhGSUFERkFBK293Z1FpY0hQRVFyQVFVb0FSeWdDN0dUd2MxUzA0VCtHQWtBUmlnQXJHZnljcFFDY3BBUndsaUxBVEFZL2o0ZzQvTWRRQUNoS0VlQktCai9QVUFBZW9BRHdMRVdBWnhqOFhFRUJlSkFTd0JVVUFjNHcrTGxLMU9FL2hnSkFROG9BOXhqNnpLQUFQRWtKWUFaRmdERU1mdWFKUFB6SFVBQmdqS0VNZEdQb3M0SUNjQkVsZ0JVVWdkb01mbGFKUHZ6SFVBRGdYY3BBRFlZK095Z0FGMU1DMkVVWnlNWFFaNmNNdzM4TUJRQk9Vd1ppTXZTSlFnR1lSQWtnR29WZ0R3T2ZpTElNL3pFVUFMaWNRakNIZ1U4R0NzQmtTZ0NaS0FTUE1mREpKdFB3SHlOcEFSaERDU0F2aGVBK0E1L01zZzMvTVJRQUNLTkxNVERvcVVnQldFd0pvSU9zeGNDZ3A0dU13MzhNQlFES1dGVVVESFo0VFFIWVJBa0FZSmVzdzMrTU1iN2YvUUdlbGZuTEJ5Q3Y3UE1uZlFFQUFNNHJVUUN5dHpBQWNxa3dkMG9VZ0RGcVhBd0E0cXN5YjhvVWdESHFYQlFBWXFvMFowb1ZBQURnbUhJRm9GSTdBeUNPYXZPbFhBRVlvOTVGQW1DdmluT2xaQUVZbytiRkFtQzlxdk9rYkFFQUFONVh1Z0JVYlcwQXJGRjVqcFF1QUdQVXZuZ0F6Rk45ZnBRdkFHUFV2NGdBWEt2RDNHaFJBTWJvY1RFQmVGNlhlZEdtQUl6UjU2SUM4SmhPYzZKVkFSaWoxOFVGNExodTg2RmRBUmlqMzBVRzRHTWQ1MExMQWpCR3o0c053TGU2em9PMkJXQ012aGNkZ0w5MW5nT3RDOEFZdlM4K1FHZmQ4Nzk5QVJqRElnRG9SdTRyQVAreUdBQjZrUGQvVXdCZXNDZ0FhcFB6LzFFQTNyQTRBR3FTNzY4cEFIZFlKQUMxeVBWdktRRHZzRmdBYXBEbjkvbFNEdmp4aDUvKzJ2MFpBRGpINFArWUU0QURMQ0tBWE9UMjV4U0FneXdtZ0J6azlURytwQWQ0SkFBUWo4Ri9qaE9BQjFoa0FMSEk1Zk1VZ0FkWmJBQXh5T1BIK05JdTRKRUF3SG9HLzNPY0FGekFJZ1JZUys0K3p4ZDRNYWNCQVBNWS9OZnhSVTZpQ0FCY3grQy9ua2NBazFpc0FOZVFwM1A0VWhkd0dnQnduc0UvbHk5M0lVVUE0SE1HL3hxKzVBMFVBWUJ2R2Z4citiSTNVZ1FBRFA1ZGZPa0JLQUpBUndiL1hyNzhZSlFCb0RKRFB3NFhJaWhGQUtqRTRJL0hCVWxBR1FBeU12UmpjM0dTVVFhQXlBejlQRnlveEpRQklBSkRQeWNYclJDRkFGakJ3Sy9CUlN4TUlRQ3VZT0RYNUtJMm94UUFIekhzKzNDaGVVVkJnTm9NZUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFHQ2Evd01meG9XK3gza1c2Z0FBQUFCSlJVNUVya0pnZ2c9PSIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIiwgInB1cnBvc2UiOiAiYW55In0sIHsic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTUFBQUFEQUNBWUFBQUJTM0d3SEFBQUdTVWxFUVZSNG5PM2R6WkVqTnhDRTBaSkNCaWhDSjNteFZzZ2FtYlBXckJYeVFpZEZ5QVBwMUxFY0xqbEVONEZDWnRYM3p2cHBBSmxBZDNObUdBRUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUEyT3VuM1Jld3kyKy8vdjdmN210UTg4Ky9mN2ZMUTRzQkUvYnJxcGVpN09BSS9Yd1Z5MUJ1UUFSL3ZVcEZLRE1RZ3ArdlFoSHNCMER3OTNNdWd1MkZFM3c5amtYNGVmY0ZYRUg0TlRtdWkxVmpIU2U0SzVmVHdPWUVJUHhlWE5iTG9nQXVrNG1QSE5aTnZnQU9rNGpuMU5kUHVnRHFrNGN4eXVzb1d3RGxTY041cXVzcFdRRFZ5Y0o3Rk5kVnJnQ0trNFI1MU5aWHFnQnFrNE0xbE5aWnBnQktrNEwxVk5aYnBnREFEaElmVjZ2c0JxdDgrL3JsMHIvM3g1OS9UYjBPUmJ0L1pHSjdBYXFGLzJyWVIxVXN4YzRTVUlBM3JRNzhLeFVLMGJZQXp1SGZIZng3N2tYWVZRSUtjSUphNko5eExFTzdBamlGM3lYNDk5eUtzS01FRk9BVHJzRy81MUtFSFFYWThqa0E0Yy9sTXBZZHVkaHlBaWdYWUVWWXJ1N0FTdGVTSmZzVVNDOUFoL0N2Q3BuNjljMlNXUUlLRU84SGExZWdYSy83RlFxUTZKMFFxUVNvd2hodWxTMUFsZkFyaGlhaTFuaXlTdEMyQUZmQ29oaVVSeXFNalFJc2REWWdhdUVZNVR6T3JBSzArMzBBNTFDY2RmYmFYVDR2bUtuVkNYQm1nWjJELzRqYjJNdWRBSVIvcnpOalVqZ0pzdkxTNGhhb2UvZ1BiaVhJVUw0QWhQOGpTdkJSMmpQQWpsdWcwUVhzRVB4SDFPY240em1nL0FrQWZLWnNBZFIzTndXalk2OThLMVN5QUlSL1hQY1NsQ3pBQ01ML1hlZTVLRmVBa1oycTg0SS9NekluRlUrQlVnV291RUJxcXMxeHFRS01ZUGQvcnVQY2xDa0F0ejV6ZExzVktsTUFmSzVTYUdjcVVRQjIvODhkOHpQejlYQ1ZRdjJ5K3dLd1RwV1FybFRpQkhpbDQrNy9MUHg4U1BpUmZRSFk1VDc2OXZYTHl6bVpOV2NWNXQ2K0FLOTAyY2tpNXUvdUhlYk91Z0FWZHFCWlJsOEV6QTYxK3hwWUYrQ1ZsVHVZeXNLUDNQSkVYSitMNnFjQWI0RXV1SCt0cVB5bkVhc0grRjJsVDRBczJhZkI2bDIvRTlzQzdMb0YrZXoxWXNZMUtiN0dWTGtkdk1LMkFLK3NDTURJUXE4c3dxNEgzY29uU2RrQzdEYXpCTnp5ck1ORDhLQXJnWjd4a0V6dzE2SUFnNDZRWlJWQjhWNi9Jc3Rib0ZmaFdCbUsxYnY1bVg4dU0veXYvbCt1RDhLY0FCZk1PQTJlL1hlNTVjbGxlUUtvbVAzR2hmRG5vd0FUWklSeXhldE5VSUJwVmdhVTRLOURBU2FiWFFUQ3Z4WUZXR1JHY0FuL2VoUmdJZTdiOVZHQUJKUkFGd1ZBYXhRZ3lkbFRnRk1qQndWSXhDK2o2NkVBeVY2Rm0vRG5vZ0FiUEFzNTRjOW4reTJSTzM4aXRLTWQ4ODIzUkFLTFVRQzBSZ0hRV3RrQ3VQNkdrcUxLYzJsYkFCNXlkVGl2aFcwQmdCa29BRm9yWFlESzk2NVpxcytoZFFHYzd6MnJjRjhENndLTXFMNkRyZFJoN3V3TDRMNERPYXN3OS9ZRkdORmhKNXV0eTV5MUtBRHdUSWtDZFBwbTh3eWQva0pkaVFJQVY1VXBBS2ZBSEoxMi80aENCUmhGQ1o3ck9EZWxDbEJwWjFKVmJZNUxGU0NDVzZHcnV0MzZITW9WWUJRbCtLN3pYSlFzd09oTzFYbmhENHBmeDVTcFpBRWlLTUdJN3VHUEtGd0FZSVR0M3dVYWRXYUhyN3pUM1hLWkUvNHUwQVFydnB2WG1VdjRzNVF2UUFRbE9CRCtIN1VvUUFRbElQeVBwVDBEUk94N0RyaDFOdHp1WVhBZGI4YjlmMFNqRStCd2RvR2RUd1BYOEdkcWR3SWNyZ1RiSlNBVnhwWjFBclF0UU1UMTNWMHRMSWRLNDZFQVNkNjV4VkVKVG9VeDNDdFpnSWg2SllqWUZ5TFg2MzRsSy93UkZPQ0RXUSs4cTRLbGZuMnpVSUNOVnJ6MXVSbzRwV3ZKVkxvQUVmb2xpUEIrL2ZtSVEvQWpjc01mMGZCemdGRXVnUmxSYVN5emJUa0JJanhPZ1lQcmFlQVcvT3pkUDRJQ25PSlNCTGZnSDFvVklNS3pCQWUxTXJpRy9yQWovQkVVNEcyN2krQWUvRVBMQWtUVUtNR3QxWVdvRXZoYnU4SWZRUUZTVlBvWm5SVmFGeUNpUndudzJNN3dSNGg4RHJCN0VyQ0h3cnBMRkFEWVJhWUFDcnNCOHFpc3Qwd0JJblFtQldzcHJiTlVBU0swSmdmenFhMnZYQUVpOUNZSmN5aXVxMlFCSWpRbkM5ZXBycWRzQVNKMEp3M25LSytqZEFFaXRDY1ByNm12bjN3Qkl2UW5FWTg1ckp0RkFTSThKaFBmdWF5WHhVWGU0MmVIZExrRS8yQnpBdHh5bStRdUhOZkY3b0x2Y1JyczV4ajhnKzJGMzZNSStaeURmN0Fmd0QyS3NGNkY0Qi9LRE9RZVJaaXZVdkFQNVFiMENHVzRybUxvYjVVZTNHY294WStxaHgwQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFDUTlUOS9oK3NQem5qeWxBQUFBQUJKUlU1RXJrSmdnZz09IiwgInNpemVzIjogIjE5MngxOTIiLCAidHlwZSI6ICJpbWFnZS9wbmciLCAicHVycG9zZSI6ICJtYXNrYWJsZSJ9XX0=">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAHUUlEQVR4nO3d3dETORCF4WZrA6CKK7IgCqIhHKIhCrLgiioyYC9gCuO1PZJG3Trdep9r+Birz5Hm8w82AwAAAAAAAAAAAAAAKOPN6gu44t3b9z9XXwN++f7jW8ospblowp5PhlJIXyChr0O1DJIXRfDrUiuC1MUQ/H2oFEHiIgj+vlYXYek/TvBxWFWEf1b8o2aEH39blYfw1hF8nIk8DUJPAMKPFpE5CSsA4UePqLyEFIDwY0REbtwLQPhxhXd+XAtA+DGDZ47cCkD4MZNXnlwKQPjhwSNX0wtA+OFpdr6mFoDwI8LMnC17KwSgYNpLzuz+j335/OHS3//46euU66hoxlsmphSA8F8Pei+K8cvVElCAQdGBP7NrIZYXYKfwq4X+md3KcKUEFOBEltA/s0MZlhWgcvizB/9e9SKMloAC3KkW/HtVixBegGrhrx78exWLMFKC7QvgHfyrQVO/PiVhBagQfo9gRYUp87V76y3BdgWYGR6V0FR8TKMowAszgqIekB0e4yvuBdg1/NlCsdvjvdVTgvIFuBKEzCG4tdsaUIDfRgefcegtdlkPCmBjw8426FHV16anACU/EFN9wFeNPNaqLxR2nQDquz/B71d1zVpPgTInQNVBetv9NChxAvQOhOA/VmkdtzkBKg1ttd61qXASpC4A4Z9vtxL8u/oCIhD8Psd6ZQ93i7QnQOtwCP+41rXLXJSUBSD8caqXIF0BCH+8yiVIVQDCv07VEqQqQAvC76fi2qYpQLadZWeZZpWiANz66Kh2KyRfAMKvp1IJ5AvQgvDHq7Lm0gXIsIPgNfUZShegRZWdKKMKay9bgJado8IAsmuZgfIpIFsAIIJkAdj9c8l8CkgW4Azh15N1JnIFUN0pqotYd8XZyhXgTNadRtkRzB3/O0WpAijuEJV9+fwhfM3VZixVgDMZdxhVz4K42ykgUwC1naGqll3fexZKs5YpAPzxxsL/S1OAnYbiofW1lRnrnGlWEgVQOhKraf1FNzq0KjOXKMCZTDuKkshd/9HPzSBFAdBPcddXtLwAKkfhI8rX9ozqLc8jCuu7vABnVg9qxYtFo1be8jz7t9TJF2CV+zAplyDTrq+GAnRQPA14bv+apQVQC9Oh5ZVShWtXu+UZsXodpU8A5cGZrStCplsehWt4RboAK4wEOrIEFXZ9JVt8QUaP0S+HOP68V/C41/fBCfDEaJA8bosIvx9OgBeufFXQrBMhy71+Vsu+JvVssIpDHd3ZPb+LV3GdHomed+vXpHICdIj6/YBdPw4FGPDx09fLt0WP/n7rzyX88/BL8KArTzVe+Twu4Z+LE+CiqO/UJfg+OAEm8XzxifD7oQCTzQ4r4fdFARzs+OHyrCiAI96To48CBKAEuigAtkYBgvSeApwaMShAoNZQE/44FCDYWbgJfywKsMCzkBP+eLwVYhHCrmHZCXAWgNX/WwDmUf7sB7dA2BoFwNYoALZGAbA16QLwi3B+6jNcWgCeCsTqDEifAIA3CoCtyRdA/R4Sz2WY3fICrL4HxDoKs19eAGClFAXIcJTib1lmJlEAhaMQsVRmLlGAFll2FOSaVZoCAB5kCqByJMKf0qxlCtAi09G6q2wzkiqA0s4AH2ozlipAi2w7zE4yzkauAGo7BOZRnK1cAVpk3GmqyzoTyQK07BRZF7yizF/tJFkAIIpsATgFcsi8+5sJF6AVJVinwtpLF0B550Ab9RlKF6BVhZ0omyprLl+A1h2kykAyaF1r9d3fLEEBzCiBkkrhN0tSALM8C4pcs0pTgFacAn4qrm2qAnArtE61W59DqgKYUYIVqobfLGEBzChBpMrhN0taADNKEKF6+M02+ZK8Y5CZBxVpp00j7Qlg1h/onQY7qneNsm8qqQtgRglm2i38ZmZvev7wu7fvf3pdyFUjwa4wwBkqrt33H9+asp3+BDiMDITToGb4e5Q5AW7tPtQW1dfI5QRo/aGrcRq8Rvj/6A50llPAbDzUmYbdY5f1oAA3ruzs2Qb/zG5rQAEeuHqLky0Iuz3eWxTgiRn3+erB2OExnnEtgBklOKgEpeJjGtX7RM12BTh4POsTFZ7M1+6NAnTyfvrzarDUr09NSAHMapXAbK/XAczqBd9s7HUqCnCnehEqBv8QWgCzuiUwq1eEysE3G3+XAgU4kb0I1YN/WFIAsz1KcMhShl1Cf7jyHjUKMEitDLuF/tbSApjtW4Jb0YXYOfC3rr5DmQI42/k9OREkCmBGCRBvxudTpn0kMsuHZVDDrLyV+UwwMGJqATgFEGFmzqafAJQAnmbny+UWiBLAg0eu3H4HoASYyStPrr8EUwLM4Jkj92eBKAGu8M5PyNOglAAjInIT9joAJUCPqLyEvhBGCdAiMifLAsl7h3BvxQa57K0QnAa4tSoPEiHkNNjX6o1QogAHirCP1cE/SFzEPYpQl0rwD1IXc48i1KEW/IPkRT1CGfJRDf0t+Qt8hVLoyBB2AAAAAAAAAAAAAMAO/gPw85Nw8cXkuQAAAABJRU5ErkJggg==">
+<meta name="theme-color" content="#131019">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TIME CHECK">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="X8 出退勤チェック — カメラで本人確認しながら出勤・退勤を記録">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131019;
+  --bg-elev:#1b1725;
+  --surface:#221d30;
+  --surface2:#2b2440;
+  --border:#3a3350;
+  --gold:#cda449;
+  --gold-dim:#8a7233;
+  --gold-soft:rgba(205,164,73,0.15);
+  --indigo:#7d8cff;
+  --danger:#e5535a;
+  --danger-soft:rgba(229,83,90,0.15);
+  --success:#38caa0;
+  --success-soft:rgba(56,202,160,0.15);
+  --text:#f3f0ea;
+  --text-dim:#a79fc0;
+  --text-faint:#6d6585;
+  --radius:14px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Noto Sans JP', sans-serif;
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+}
+button, input, select, textarea{ font-family:inherit; }
+button{cursor:pointer;}
+#app{display:flex; flex-direction:column; height:100dvh; max-width:560px; margin:0 auto; position:relative;}
+
+/* ===== header ===== */
+header{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 14px 10px; border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, var(--bg-elev), var(--bg));
+  gap:8px;
+}
+.brand{display:flex; align-items:center; gap:8px; min-width:0;}
+.brand .mark{
+  font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:1px;
+  font-size:18px; color:var(--gold); border:1.5px solid var(--gold); border-radius:6px;
+  padding:2px 7px 2px 8px; text-align:center; line-height:1.3; flex:0 0 auto;
+}
+.brand .titles{min-width:0;}
+.brand .sub{font-size:11px; color:var(--text-faint); letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.brand .page-title{font-size:13.5px; color:var(--text-dim); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.header-clock{font-family:'Oswald',sans-serif; font-size:20px; font-weight:600; color:var(--gold); letter-spacing:0.5px; flex:0 0 auto;}
+
+/* ===== main / tabs ===== */
+main{flex:1 1 auto; overflow-y:auto; padding:14px 14px calc(84px + env(safe-area-inset-bottom,0px)); -webkit-overflow-scrolling:touch;}
+
+nav#bottomNav{
+  position:absolute; left:0; right:0; bottom:2px;
+  display:flex; background:var(--bg-elev); border-top:1px solid var(--border);
+  padding:5px 4px calc(4px + env(safe-area-inset-bottom,0px));
+  border-radius:16px 16px 0 0;
+  z-index:20;
+}
+nav#bottomNav button{
+  flex:1; background:none; border:none; color:var(--text-faint); font-family:inherit;
+  font-size:10.5px; padding:6px 0 4px; display:flex; flex-direction:column; align-items:center; gap:3px;
+  border-radius:10px; font-weight:500;
+}
+nav#bottomNav button .icon{font-size:18px;}
+nav#bottomNav button.active{color:var(--gold);}
+nav#bottomNav button.active .icon{filter:drop-shadow(0 0 6px rgba(205,164,73,0.5));}
+
+/* ===== generic ===== */
+.section-title{font-size:12.5px; color:var(--gold); letter-spacing:1px; font-weight:700; margin:20px 0 8px;}
+.section-title:first-child{margin-top:0;}
+.hint{font-size:12.5px; color:var(--text-faint); margin:0 0 14px; text-align:center;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px;}
+.row{display:flex; align-items:center; gap:8px;}
+.row + .row{margin-top:8px;}
+.btn{
+  background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:11px;
+  padding:12px 14px; font-size:14px; font-family:inherit; font-weight:700;
+}
+.btn:active{transform:scale(0.97);}
+.btn.gold{background:var(--gold); color:#221a05; border-color:var(--gold);}
+.btn.ghost{background:none; border:1px solid var(--border); color:var(--text-dim); font-weight:500;}
+.btn.danger{background:var(--danger); border-color:var(--danger); color:#fff;}
+.btn.danger.outline{background:none; color:var(--danger); border-color:var(--danger);}
+.btn.small{padding:7px 10px; font-size:12px;}
+.btn.block{width:100%;}
+.btn.icon-only{padding:9px; width:38px; display:flex; align-items:center; justify-content:center;}
+.btn:disabled{opacity:0.4;}
+.pill{display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dim); white-space:nowrap; flex:0 0 auto;}
+.pill.in{background:var(--success-soft); border-color:var(--success); color:var(--success); font-weight:700;}
+.pill.out{background:var(--gold-soft); border-color:var(--gold); color:var(--gold); font-weight:700;}
+input[type=text], input[type=month]{
+  background:var(--bg-elev); border:1px solid var(--border); color:var(--text); border-radius:9px;
+  padding:10px 12px; font-size:14px; font-family:inherit; width:100%;
+}
+input[type=month]{ color-scheme:dark; }
+input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+.empty-hint{color:var(--text-faint); font-size:12.5px; text-align:center; padding:26px 10px; border:1px dashed var(--border); border-radius:var(--radius);}
+::-webkit-scrollbar{width:0; height:0;}
+
+/* ===== staff select ===== */
+.staff-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+.staff-btn{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px 10px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  color:var(--text); font-size:14.5px; font-weight:700;
+}
+.staff-btn:active{transform:scale(0.96); border-color:var(--gold);}
+.staff-avatar{
+  width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:17px; color:#1a1520;
+}
+
+/* ===== camera / clock view ===== */
+.cam-card{padding:16px;}
+.cam-staffname{text-align:center; font-size:15px; font-weight:700; color:var(--gold); margin-bottom:10px;}
+.camera-wrap{
+  position:relative; width:100%; aspect-ratio:3/4; max-height:52vh; border-radius:var(--radius); overflow:hidden;
+  background:var(--bg-elev); border:1px solid var(--border); margin-bottom:14px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.camera-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
+.cam-placeholder{display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--text-faint); font-size:13px; text-align:center; padding:20px;}
+.visually-hidden-file{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+.big-action{padding:16px 14px; font-size:16px; letter-spacing:0.5px;}
+.btn.outbtn{background:var(--indigo); border-color:var(--indigo); color:#fff;}
+
+/* ===== success overlay ===== */
+.success-wrap{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center;}
+.success-check{
+  width:74px; height:74px; border-radius:50%; background:var(--success-soft); border:2px solid var(--success);
+  display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--success); margin-bottom:16px;
+}
+.success-name{font-size:17px; font-weight:700; color:var(--text); margin-bottom:4px;}
+.success-detail{font-size:14px; color:var(--text-dim);}
+.success-message{margin-top:20px; font-size:15px; font-weight:700; padding:13px 20px; border-radius:12px; max-width:280px; line-height:1.55; cursor:pointer;}
+.success-message:active{transform:scale(0.97);}
+.success-message.hype{background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold);}
+.success-message.otsukare{background:var(--surface2); color:var(--text-dim); border:1px solid var(--border); font-weight:600;}
+.success-message-by{margin-top:7px; font-size:11.5px; font-weight:700; letter-spacing:0.5px; opacity:0.75; text-align:right;}
+
+/* ===== log ===== */
+.log-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.log-date{font-size:14.5px; font-weight:700; color:var(--text);}
+.log-row{display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--border);}
+.log-row:last-child{border-bottom:none;}
+.log-thumb{width:42px; height:42px; border-radius:10px; object-fit:cover; flex:0 0 auto; border:1px solid var(--border);}
+.log-thumb.placeholder{
+  display:flex; align-items:center; justify-content:center; background:var(--surface2); color:var(--text-dim);
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:15px;
+}
+.log-thumb.placeholder.broken{ background:var(--danger-soft); color:var(--danger); border-color:var(--danger); font-size:16px; }
+.log-info{flex:1 1 auto; min-width:0;}
+.log-name{font-size:13.5px; font-weight:700; color:var(--text);}
+.log-time{font-size:12px; color:var(--text-faint); font-family:'Oswald',sans-serif;}
+
+/* ===== lightbox ===== */
+.lightbox{
+  position:fixed; inset:0; background:rgba(10,8,14,0.92); z-index:100;
+  display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.lightbox img{max-width:100%; max-height:80vh; border-radius:12px; border:1px solid var(--border);}
+.lightbox-close{
+  position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px;
+  width:36px; height:36px; border-radius:50%; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); font-size:18px; display:flex; align-items:center; justify-content:center;
+}
+
+/* ===== modal ===== */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(10,8,14,0.72); z-index:150;
+  display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.modal-box{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px; width:100%; max-width:320px;
+}
+.modal-message{font-size:14.5px; color:var(--text); margin-bottom:14px; line-height:1.5; text-align:center;}
+.modal-input{
+  background:var(--bg-elev); border:1px solid var(--border); color:var(--text); border-radius:9px;
+  padding:10px 12px; font-size:16px; font-family:inherit; width:100%; text-align:center; letter-spacing:4px;
+  margin-bottom:8px;
+}
+.modal-error{color:var(--danger); font-size:12.5px; text-align:center; margin-bottom:8px;}
+.modal-actions{display:flex; gap:8px; margin-top:6px;}
+.modal-actions .btn{flex:1;}
+
+/* ===== settings ===== */
+.settings-row{padding:8px 0;}
+.staff-dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto;}
+.settings-name{flex:1 1 auto; font-size:14px; font-weight:600;}
+
+/* ===== toast ===== */
+#toast{
+  position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(20px);
+  background:var(--danger); color:#fff; padding:10px 16px; border-radius:20px; font-size:13px; font-weight:600;
+  z-index:200; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:80%; text-align:center;
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="mark">X8</div>
+      <div class="titles">
+        <div class="sub">TIME CHECK</div>
+        <div class="page-title" id="headerTitle">出退勤</div>
+      </div>
+    </div>
+    <div class="header-clock" id="headerClock">--:--</div>
+  </header>
+  <main id="main"></main>
+  <nav id="bottomNav">
+    <button data-action="switchTab" data-tab="clock" class="active"><span class="icon">🕐</span><span>打刻</span></button>
+    <button data-action="switchTab" data-tab="log"><span class="icon">📋</span><span>ログ</span></button>
+    <button data-action="switchTab" data-tab="settings"><span class="icon">⚙️</span><span>設定</span></button>
+  </nav>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+'use strict';
+/* =========================================================================
+   X8 TIME CHECK — 出退勤チェック（スタッフ共有・カメラで本人確認）
+   データ層: Firebase Realtime Database — X8 OPEN CHECKと同じプロジェクト
+   （x8clean）を、timecheck/ 以下だけを使って共有する（OPEN CHECK側の
+   categories/items/days等には一切触れない）。
+   ホスティング: GitHub Pages（誰でもアクセス可、Claudeのサインイン不要）。
+   ========================================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getDatabase,
+  ref as fbRef,
+  get as fbGet,
+  set as fbSet,
+  update as fbUpdate,
+  onValue as fbOnValue
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+const BUILD_STAMP = 'web-1 - 2026-09-26';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
+  authDomain: "x8clean.firebaseapp.com",
+  databaseURL: "https://x8clean-default-rtdb.firebaseio.com",
+  projectId: "x8clean",
+  storageBucket: "x8clean.firebasestorage.app",
+  messagingSenderId: "716422687785",
+  appId: "1:716422687785:web:3d18478a3c301580ea4038"
+};
+// Everything this app stores lives under one top-level key so it can share
+// x8clean's database with X8 OPEN CHECK without ever touching that app's data.
+const DB_PREFIX = 'timecheck';
+function fullPath(path){ return DB_PREFIX + '/' + path; }
+
+let db = null;
+let rtdb = null;
+
+/* ---------- thin db adapter ----------
+   Mirrors a small doc/collection/get/set/update/onSnapshot surface so all
+   of the application code below (ported as-is) doesn't need to know it's
+   now talking to Firebase's Realtime Database instead of a Claude-artifact
+   capability. */
+function wrapSnap(fbSnap, id){
+  const exists = fbSnap.exists();
+  return { id, exists, data: () => exists ? fbSnap.val() : undefined };
+}
+function makeDocRef(path){
+  const segs = path.split('/');
+  const id = segs[segs.length-1];
+  return {
+    id,
+    async get(){ const snap = await fbGet(fbRef(rtdb, fullPath(path))); return wrapSnap(snap, id); },
+    async set(data){ await fbSet(fbRef(rtdb, fullPath(path)), data); },
+    async update(patch){
+      // Recursive-merge semantics via a multi-location update: flatten
+      // nested objects into slash-joined keys so only the leaves named in
+      // `patch` are touched (e.g. one day's events), leaving everything
+      // else already stored at this path (other days, other fields) alone.
+      const flat = {};
+      (function flatten(prefix, obj){
+        for(const k in obj){
+          const v = obj[k];
+          const key = prefix ? prefix + '/' + k : k;
+          if(v && typeof v==='object' && !Array.isArray(v)) flatten(key, v);
+          else flat[key] = v;
+        }
+      })('', patch);
+      await fbUpdate(fbRef(rtdb, fullPath(path)), flat);
+    },
+    onSnapshot(next, errCb){
+      const r = fbRef(rtdb, fullPath(path));
+      return fbOnValue(
+        r,
+        (snap)=>{ try{ next(wrapSnap(snap, id)); }catch(e){} },
+        (err)=>{ if(errCb) errCb({ code:'unavailable', message: err && err.message }); }
+      );
+    },
+    collection(sub){ return makeCollectionRef(path + '/' + sub); }
+  };
+}
+function makeCollectionRef(path){
+  return {
+    doc(id){ return makeDocRef(id ? path + '/' + id : path + '/' + genPushId()); },
+    where(field, op, val){
+      return {
+        async get(){
+          const snap = await fbGet(fbRef(rtdb, fullPath(path)));
+          const valObj = snap.exists() ? snap.val() : {};
+          const docs = [];
+          for(const docId in valObj){
+            const data = valObj[docId];
+            const match = (op==='==') ? (data && data[field]===val) : false;
+            if(match) docs.push({ id: docId, data: () => data });
+          }
+          return { docs };
+        }
+      };
+    }
+  };
+}
+function genPushId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+let staffList = [];
+let unsubStaff = null;
+
+// Gate on the ログ (log/history, with photos) and 設定 (staff list, export)
+// tabs, so the shared clock-in device can sit out for anyone to tap 打刻
+// without also exposing everyone's history. Resets on reload — it's a
+// deterrent for casual staff, not real access control.
+const MANAGEMENT_PASSWORD = '6666';
+let managementUnlocked = false;
+
+let tab = 'clock';
+let clockView = 'select';
+let cameraViewBuilt = false;
+let selectedStaff = null;
+let pendingAction = null;
+let capturedPhotoBlob = null;
+let capturedPhotoPreviewUrl = null;
+let submitting = false;
+let successInfo = null;
+
+let logDate = new Date();
+let logEntries = null;
+let logLoading = false;
+
+let lightboxOpen = false;
+let lightboxSrc = '';
+
+const STAFF_COLORS = ['#cda449','#7d8cff','#38caa0','#e5535a','#c98bd8','#5fb0d9','#e6a15c','#7ad1c9'];
+
+/* A few lines mixed in below are real, widely-quoted meigen (sourced from
+   published quote roundups), kept verbatim but shown without attribution. */
+const HYPE_MESSAGES_IN = [
+  { text: 'さあ、今夜も魅せてこう🔥' },
+  { text: '今夜のNo.1はお前だ、いってらっしゃい！' },
+  { text: '気合十分、売上叩き出そうぜ！' },
+  { text: '準備OK、最高の一夜にしよう🍾' },
+  { text: '今夜も全力でいこう、期待してるよ！' },
+  { text: '調子いいね、今日も気持ちよく決めてこい！' },
+  { text: '1回きりの人生だから、自分はエキストラではなく主役でいたい。' },
+  { text: '前例ってなければ作ればいい。' },
+  { text: '緊張は成長痛。' },
+  { text: '笑われるくらいの目標の方が叶える価値ある。' },
+  { text: '自分の人生は自分が主役。' },
+  { text: '反骨心が俺の恩人であり相棒さ。' },
+  { text: '誰もやっていないからこそやりたい。' },
+  { text: 'NOと言えて初めて、その人のYESに価値が生まれる。' },
+  { text: '人生成功したければやるか、やらないかじゃない。やるか、やるかだ。' },
+];
+const OTSUKARE_MESSAGES_OUT = [
+  { text: 'お疲れ様、今日もよく頑張った' },
+  { text: 'お疲れ様でした、ゆっくり休んでね' },
+  { text: '今日も一日お疲れ様、気をつけて帰って' },
+  { text: 'お疲れ！今夜も最高だったよ' },
+  { text: 'お疲れ様でした、また明日よろしく' },
+  { text: 'よく頑張った、今日はゆっくり休んで' },
+  { text: 'これは負けじゃなくて、勝ちの途中なんだ。' },
+  { text: '全力で考え得る全てを出し切れば、どう転んだってプラスになるということを学んだ。' },
+  { text: '今日よりも明日、明日よりもあさって。よりよい自分にアプローチするために頑張っている。' },
+];
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function csvField(v){
+  const s = String(v==null ? '' : v);
+  if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function monthKeyOf(d){ return d.getFullYear() + '-' + pad2(d.getMonth()+1); }
+function dayKeyOf(d){ return pad2(d.getDate()); }
+function timeStrOf(d){ return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+function isToday(d){ const n=new Date(); return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate(); }
+function dateLabel(d){ return (d.getMonth()+1) + '月' + d.getDate() + '日（' + '日月火水木金土'[d.getDay()] + '）' + (isToday(d) ? '・今日' : ''); }
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function colorFor(id){ let h=0; for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0; return STAFF_COLORS[h % STAFF_COLORS.length]; }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(()=>{ t.classList.remove('show'); }, 2600);
+}
+
+async function init(){
+  try{
+    const fbApp = initializeApp(FIREBASE_CONFIG);
+    rtdb = getDatabase(fbApp);
+    db = { doc: makeDocRef, collection: makeCollectionRef };
+  }catch(e){ db = null; rtdb = null; }
+  subscribeStaff();
+  renderApp();
+  setInterval(()=>{
+    const el = document.getElementById('headerClock');
+    if(el) el.textContent = timeStrOf(new Date());
+  }, 15000);
+  document.getElementById('headerClock').textContent = timeStrOf(new Date());
+
+  document.getElementById('app').addEventListener('click', onAppClick);
+  document.getElementById('toast').addEventListener('click', ()=>{ document.getElementById('toast').classList.remove('show'); });
+}
+
+function subscribeStaff(){
+  if(!db) { renderApp(); return; }
+  unsubStaff = db.doc('config/staff').onSnapshot(
+    (snap)=>{
+      const data = snap.exists ? snap.data() : null;
+      staffList = (data && Array.isArray(data.list)) ? data.list : [];
+      renderApp();
+    },
+    (err)=>{ /* keep last known list on transient error */ }
+  );
+}
+
+function onAppClick(e){
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  if(action==='switchTab') switchTab(el.dataset.tab);
+  else if(action==='selectStaff'){ const s = staffList.find(x=>x.id===el.dataset.id); if(s) selectStaff(s); }
+  else if(action==='cancelClock') cancelClock();
+  else if(action==='doCapture') doCapture();
+  else if(action==='retakePhoto') retakePhoto();
+  else if(action==='logPrev'){ const d=new Date(logDate); d.setDate(d.getDate()-1); logDate=d; loadLogForDate(); }
+  else if(action==='logNext'){ if(!isToday(logDate)){ const d=new Date(logDate); d.setDate(d.getDate()+1); logDate=d; loadLogForDate(); } }
+  else if(action==='openLightbox'){ lightboxOpen=true; lightboxSrc=el.dataset.full; renderLightbox(); }
+  else if(action==='closeLightbox'){ lightboxOpen=false; renderLightbox(); }
+  else if(action==='removeStaff') removeStaff(el.dataset.id);
+  else if(action==='addStaff') addStaff();
+  else if(action==='dismissSuccess') dismissSuccessNow();
+  else if(action==='exportExcel') exportAttendanceExcel();
+  else if(action==='modalCancel') closeModal();
+  else if(action==='modalConfirmYes') modalConfirmYes();
+  else if(action==='modalPasswordSubmit') submitModalPassword();
+}
+
+function dismissSuccessNow(){
+  if(clockView!=='success') return;
+  clockView = 'select'; selectedStaff = null; pendingAction = null; successInfo = null;
+  renderApp();
+}
+
+function switchTab(t){
+  if(t===tab) return;
+  if((t==='log' || t==='settings') && !managementUnlocked){
+    showPasswordModal(()=>{ managementUnlocked = true; doSwitchTab(t); });
+    return;
+  }
+  doSwitchTab(t);
+}
+
+function doSwitchTab(t){
+  if(tab==='clock' && clockView==='camera'){ resetPhotoState(); }
+  tab = t;
+  clockView = 'select';
+  selectedStaff = null;
+  pendingAction = null;
+  cameraViewBuilt = false;
+  document.getElementById('headerTitle').textContent = t==='clock' ? '出退勤' : (t==='log' ? '記録ログ' : '設定');
+  document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  if(t==='log') logLoading = true;
+  renderApp();
+  if(t==='log') loadLogForDate();
+}
+
+function renderApp(){
+  const main = document.getElementById('main');
+  if(tab==='clock'){
+    if(clockView==='select') renderClockSelect(main);
+    else if(clockView==='camera') renderClockCamera(main);
+    else if(clockView==='success') renderClockSuccess(main);
+  } else if(tab==='log'){
+    renderLog(main);
+  } else if(tab==='settings'){
+    renderSettings(main);
+  }
+}
+
+/* ---------- clock: select ---------- */
+function renderClockSelect(main){
+  if(!db){
+    main.innerHTML = '<div class="empty-hint">この端末ではデータ保存を利用できません</div>';
+    return;
+  }
+  if(!staffList.length){
+    main.innerHTML = '<div class="empty-hint">スタッフが登録されていません<br>「設定」タブから追加してください</div>';
+    return;
+  }
+  main.innerHTML = `
+    <div class="hint">出勤・退勤するスタッフをタップしてください</div>
+    <div class="staff-grid">
+      ${staffList.map(s => `
+        <button class="staff-btn" data-action="selectStaff" data-id="${escapeHtml(s.id)}">
+          <div class="staff-avatar" style="background:${colorFor(s.id)}">${escapeHtml((s.name||'?').slice(0,1))}</div>
+          <div>${escapeHtml(s.name)}</div>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ---------- clock: camera ---------- */
+function renderClockCamera(main){
+  if(!cameraViewBuilt){
+    main.innerHTML = `
+      <div class="card cam-card">
+        <div class="cam-staffname">${escapeHtml(selectedStaff.name)}</div>
+        <label class="camera-wrap" id="cameraWrap" for="camFileInput">
+          <div class="cam-placeholder" id="camPlaceholder">
+            <span style="font-size:30px;">📷</span>
+            <span>タップして撮影</span>
+          </div>
+          <img id="camPreview" style="display:none;" alt="">
+        </label>
+        <input type="file" accept="image/*" capture="user" id="camFileInput" class="visually-hidden-file">
+        <button class="btn ghost block small" id="retakeBtn" data-action="retakePhoto" style="display:none; margin-bottom:10px;">📷 撮り直す</button>
+        <button class="btn block big-action" id="actionBtn" disabled>確認中…</button>
+        <button class="btn ghost block" data-action="cancelClock" style="margin-top:10px">キャンセル</button>
+      </div>
+    `;
+    cameraViewBuilt = true;
+    const fileInput = document.getElementById('camFileInput');
+    if(fileInput) fileInput.addEventListener('change', onPhotoFileSelected);
+    resolvePendingAction();
+  }
+  updateCameraViewState();
+}
+
+function updateCameraViewState(){
+  const placeholder = document.getElementById('camPlaceholder');
+  const preview = document.getElementById('camPreview');
+  const retakeBtn = document.getElementById('retakeBtn');
+  const btn = document.getElementById('actionBtn');
+  if(!btn) return;
+
+  const hasPhoto = !!(capturedPhotoBlob && capturedPhotoPreviewUrl);
+  if(placeholder) placeholder.style.display = hasPhoto ? 'none' : 'flex';
+  if(preview){
+    if(hasPhoto){ preview.src = capturedPhotoPreviewUrl; preview.style.display = 'block'; }
+    else { preview.style.display = 'none'; preview.removeAttribute('src'); }
+  }
+  if(retakeBtn) retakeBtn.style.display = hasPhoto ? 'block' : 'none';
+
+  if(pendingAction===null){
+    btn.textContent = '確認中…';
+    btn.disabled = true;
+    btn.className = 'btn block big-action';
+    btn.removeAttribute('data-action');
+  } else if(hasPhoto){
+    btn.textContent = pendingAction==='in' ? '出勤する' : '退勤する';
+    btn.disabled = false;
+    btn.className = 'btn block big-action ' + (pendingAction==='in' ? 'gold' : 'outbtn');
+    btn.dataset.action = 'doCapture';
+  } else {
+    btn.textContent = '上の枠をタップして撮影してください';
+    btn.disabled = true;
+    btn.className = 'btn block big-action ghost';
+    btn.removeAttribute('data-action');
+  }
+}
+
+function loadImageFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{ URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = (err)=>{ URL.revokeObjectURL(url); reject(err); };
+    img.src = url;
+  });
+}
+
+async function onPhotoFileSelected(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{
+    const img = await loadImageFromFile(file);
+    const w = 480, h = Math.max(1, Math.round(w * img.height / img.width));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.82));
+    if(!blob) throw new Error('canvas toBlob failed');
+    if(capturedPhotoPreviewUrl) URL.revokeObjectURL(capturedPhotoPreviewUrl);
+    capturedPhotoBlob = blob;
+    capturedPhotoPreviewUrl = URL.createObjectURL(blob);
+  }catch(err){
+    showToast('写真の読み込みに失敗しました。もう一度お試しください');
+    return;
+  }
+  updateCameraViewState();
+}
+
+function resetPhotoState(){
+  if(capturedPhotoPreviewUrl) URL.revokeObjectURL(capturedPhotoPreviewUrl);
+  capturedPhotoBlob = null;
+  capturedPhotoPreviewUrl = null;
+}
+
+function blobToDataUrl(blob){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/* Every photo is stored as a compressed data URL embedded directly in its
+   own db document (see doCapture) rather than through the assets/blob
+   capability, so viewing never depends on a separate blob fetch resolving
+   correctly. Tries progressively smaller/lower-quality encodes until the
+   result comfortably clears the per-document size cap. */
+async function makeInlinePhotoDataUrl(){
+  const attempts = [
+    { w: 480, q: 0.7 },
+    { w: 480, q: 0.5 },
+    { w: 400, q: 0.4 },
+    { w: 320, q: 0.35 },
+  ];
+  let img;
+  try{ img = await loadImageFromFile(capturedPhotoBlob); }catch(e){ return null; }
+  for(const a of attempts){
+    const h = Math.max(1, Math.round(a.w * img.height / img.width));
+    const canvas = document.createElement('canvas');
+    canvas.width = a.w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, a.w, h);
+    const smallBlob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',a.q));
+    if(!smallBlob) continue;
+    const dataUrl = await blobToDataUrl(smallBlob);
+    if(dataUrl.length < 200000) return dataUrl;
+  }
+  return null;
+}
+
+function retakePhoto(){
+  resetPhotoState();
+  updateCameraViewState();
+}
+
+async function fetchMonthDoc(staffId, monthKey){
+  if(!db) return null;
+  try{
+    const snap = await db.doc('attendance/' + staffId + '_' + monthKey).get();
+    return snap.exists ? snap.data() : null;
+  }catch(e){ return null; }
+}
+
+async function resolvePendingAction(){
+  const staff = selectedStaff;
+  const now = new Date();
+  const y = new Date(now); y.setDate(now.getDate()-1);
+  const curMonth = monthKeyOf(now), curDay = dayKeyOf(now);
+  const yMonth = monthKeyOf(y), yDay = dayKeyOf(y);
+
+  const monthsNeeded = Array.from(new Set([curMonth, yMonth]));
+  const fetched = {};
+  for(const m of monthsNeeded){ fetched[m] = await fetchMonthDoc(staff.id, m); }
+
+  let events = [];
+  const curDays = (fetched[curMonth] && fetched[curMonth].days) || {};
+  const yDays = (fetched[yMonth] && fetched[yMonth].days) || {};
+  if(curDays[curDay] && curDays[curDay].events) events = events.concat(curDays[curDay].events);
+  if(yDays[yDay] && yDays[yDay].events) events = events.concat(yDays[yDay].events);
+  events.sort((a,b)=>a.ts-b.ts);
+  const last = events.length ? events[events.length-1] : null;
+
+  if(selectedStaff !== staff) return; // user navigated away meanwhile
+  pendingAction = (last && last.type==='in') ? 'out' : 'in';
+  if(clockView==='camera') updateCameraViewState();
+}
+
+function selectStaff(staff){
+  showConfirmModal('「' + staff.name + '」で間違いないですか？', ()=>doSelectStaff(staff));
+}
+
+function doSelectStaff(staff){
+  resetPhotoState();
+  selectedStaff = staff;
+  pendingAction = null;
+  clockView = 'camera';
+  cameraViewBuilt = false;
+  renderApp();
+}
+
+function cancelClock(){
+  resetPhotoState();
+  clockView = 'select';
+  selectedStaff = null;
+  pendingAction = null;
+  cameraViewBuilt = false;
+  renderApp();
+}
+
+async function doCapture(){
+  if(submitting) return;
+  if(pendingAction===null) return;
+  if(!capturedPhotoBlob) return;
+  submitting = true;
+
+  const action = pendingAction;
+  const staff = selectedStaff;
+  const btn = document.getElementById('actionBtn');
+  const retakeBtn = document.getElementById('retakeBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '記録中…'; }
+  if(retakeBtn) retakeBtn.disabled = true;
+
+  const now = new Date();
+  let photoRef = null;
+
+  // Photos are stored inline as a compressed data URL in their own small
+  // db document, right alongside the event — simplest and most reliable
+  // across every device, with nothing else to fetch separately.
+  try{
+    const dataUrl = await makeInlinePhotoDataUrl();
+    if(dataUrl){
+      const photoDocId = 'ph' + now.getTime().toString(36) + Math.random().toString(36).slice(2,7);
+      await db.collection('photos').doc(photoDocId).set({ dataUrl, ts: now.getTime() });
+      photoRef = 'inline:' + photoDocId;
+    }
+  }catch(e){ /* proceed without a photo */ }
+
+  const monthKey = monthKeyOf(now);
+  const dayKey = dayKeyOf(now);
+  const event = { type:action, time:timeStrOf(now), ts: now.getTime() };
+  if(photoRef) event.photo = photoRef;
+  const photoAttachFailed = !photoRef;
+
+  let saveOk = false;
+  try{
+    const ref = db.doc('attendance/' + staff.id + '_' + monthKey);
+    const snap = await ref.get();
+    const existingDays = (snap.exists && snap.data().days) || {};
+    const existingEvents = (existingDays[dayKey] && existingDays[dayKey].events) || [];
+    const newEvents = existingEvents.concat([event]);
+    if(snap.exists){
+      await ref.update({ days: { [dayKey]: { events: newEvents } } });
+    } else {
+      await ref.set({ staffId: staff.id, staffName: staff.name, month: monthKey, days: { [dayKey]: { events: newEvents } } });
+    }
+    saveOk = true;
+  }catch(e){
+    try{
+      await db.doc('attendance/' + staff.id + '_' + monthKey).set(
+        { staffId: staff.id, staffName: staff.name, month: monthKey, days: { [dayKey]: { events: [event] } } }
+      );
+      saveOk = true;
+    }catch(e2){ saveOk = false; }
+  }
+
+  submitting = false;
+
+  if(!saveOk){
+    showToast('記録に失敗しました。もう一度お試しください');
+    resetPhotoState();
+    clockView = 'select'; selectedStaff = null; pendingAction = null; cameraViewBuilt = false;
+    renderApp();
+    return;
+  }
+
+  resetPhotoState();
+  if(photoAttachFailed) showToast('記録は完了しましたが、写真の保存に失敗しました');
+  const message = action==='in' ? pickRandom(HYPE_MESSAGES_IN) : pickRandom(OTSUKARE_MESSAGES_OUT);
+  successInfo = { name: staff.name, action, time: timeStrOf(now), message: message.text, messageBy: message.by || null };
+  clockView = 'success';
+  cameraViewBuilt = false;
+  renderApp();
+  // No auto-dismiss: this screen stays up until the viewer taps the message
+  // (see dismissSuccessNow), so there's no rush to read it.
+}
+
+function renderClockSuccess(main){
+  const quoted = !!successInfo.messageBy;
+  main.innerHTML = `
+    <div class="success-wrap">
+      <div class="success-check">✓</div>
+      <div class="success-name">${escapeHtml(successInfo.name)}</div>
+      <div class="success-detail">${successInfo.action==='in' ? '出勤' : '退勤'}　${successInfo.time}</div>
+      <div class="success-message ${successInfo.action==='in' ? 'hype' : 'otsukare'}" data-action="dismissSuccess">
+        <div>${quoted ? '“' : ''}${escapeHtml(successInfo.message)}${quoted ? '”' : ''}</div>
+        ${quoted ? `<div class="success-message-by">— ${escapeHtml(successInfo.messageBy)}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- log ---------- */
+function renderLog(main){
+  main.innerHTML = `
+    <div class="log-header">
+      <button class="btn icon-only ghost" data-action="logPrev">‹</button>
+      <div class="log-date">${dateLabel(logDate)}</div>
+      <button class="btn icon-only ghost" data-action="logNext" ${isToday(logDate) ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="card" id="logListWrap">${logListHtml()}</div>
+  `;
+}
+
+/* If a stored photo fails to actually load (asset missing/expired, or a
+   transient network hiccup), swap the broken <img> for a distinguishable
+   placeholder instead of leaving the browser's broken-image icon — that
+   way "no photo was ever attached" and "a photo exists but won't load"
+   look different, instead of both reading as "no photo". */
+window.handleLogThumbError = function(imgEl){
+  const div = document.createElement('div');
+  div.className = 'log-thumb placeholder broken';
+  div.textContent = '!';
+  div.title = '写真の読み込みに失敗しました';
+  imgEl.replaceWith(div);
+};
+
+window.handleLightboxImgError = function(imgEl){
+  const div = document.createElement('div');
+  div.style.color = '#fff';
+  div.style.fontSize = '13px';
+  div.textContent = '写真を読み込めませんでした';
+  imgEl.replaceWith(div);
+};
+
+function logListHtml(){
+  if(logLoading) return '<div class="empty-hint">読み込み中…</div>';
+  if(!logEntries || logEntries.length===0) return '<div class="empty-hint">この日の記録はありません</div>';
+  return logEntries.map(e => `
+    <div class="log-row">
+      ${e.photoSrc
+        ? `<img class="log-thumb" src="${e.photoSrc}" data-action="openLightbox" data-full="${e.photoSrc}" onerror="handleLogThumbError(this)">`
+        : `<div class="log-thumb placeholder">${escapeHtml((e.staffName||'?').slice(0,1))}</div>`}
+      <div class="log-info">
+        <div class="log-name">${escapeHtml(e.staffName)}</div>
+        <div class="log-time">${e.time}</div>
+      </div>
+      <div class="pill ${e.type==='in' ? 'in' : 'out'}">${e.type==='in' ? '出勤' : '退勤'}</div>
+    </div>
+  `).join('');
+}
+
+async function loadLogForDate(){
+  logLoading = true;
+  logEntries = null;
+  const wrap = document.getElementById('logListWrap');
+  if(wrap) wrap.innerHTML = logListHtml();
+  const dateHeader = document.querySelector('.log-date');
+  if(dateHeader) dateHeader.textContent = dateLabel(logDate);
+  const nextBtn = document.querySelector('[data-action="logNext"]');
+  if(nextBtn) nextBtn.disabled = isToday(logDate);
+
+  const monthKey = monthKeyOf(logDate);
+  const dayKey = dayKeyOf(logDate);
+  let entries = [];
+  if(db){
+    try{
+      const snap = await db.collection('attendance').where('month','==',monthKey).get();
+      snap.docs.forEach(d=>{
+        const data = d.data();
+        const dayData = data.days && data.days[dayKey];
+        if(dayData && Array.isArray(dayData.events)){
+          dayData.events.forEach(ev=>{
+            entries.push({ staffName: data.staffName || data.staffId || '?', type: ev.type, time: ev.time, ts: ev.ts, photo: ev.photo || null });
+          });
+        }
+      });
+      entries.sort((a,b)=>a.ts-b.ts);
+
+      // Every photo is stored inline (see doCapture); resolve each
+      // "inline:<id>" reference to its actual data URL before rendering.
+      const inlineIds = Array.from(new Set(
+        entries.filter(e=>e.photo && e.photo.startsWith('inline:')).map(e=>e.photo.slice(7))
+      ));
+      const inlineMap = {};
+      if(inlineIds.length){
+        await Promise.all(inlineIds.map(async id=>{
+          try{
+            const psnap = await db.doc('photos/' + id).get();
+            if(psnap.exists) inlineMap[id] = psnap.data().dataUrl;
+          }catch(e){ /* leave unresolved; shows placeholder */ }
+        }));
+      }
+      entries.forEach(e=>{
+        e.photoSrc = (e.photo && e.photo.startsWith('inline:')) ? (inlineMap[e.photo.slice(7)] || null) : null;
+      });
+    }catch(e){ entries = []; }
+  }
+  logEntries = entries;
+  logLoading = false;
+  if(tab==='log') renderLog(document.getElementById('main'));
+}
+
+/* ---------- lightbox ---------- */
+function renderLightbox(){
+  let el = document.getElementById('lightboxEl');
+  if(!lightboxOpen){
+    if(el) el.remove();
+    return;
+  }
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'lightboxEl';
+    el.className = 'lightbox';
+    document.getElementById('app').appendChild(el);
+  }
+  el.innerHTML = `
+    <button class="lightbox-close" data-action="closeLightbox">✕</button>
+    <img src="${lightboxSrc}" onerror="handleLightboxImgError(this)">
+  `;
+  el.onclick = (e)=>{ if(e.target===el) { lightboxOpen=false; renderLightbox(); } };
+}
+
+/* ---------- modal (confirm / password) ----------
+   Built by hand rather than window.confirm/prompt, so every yes/no or
+   password check matches the app's own dark/gold look instead of the
+   browser's default popup style. */
+let modalState = null;
+
+function showConfirmModal(message, onYes){
+  modalState = { kind:'confirm', message, onYes };
+  renderModal();
+}
+
+function showPasswordModal(onSuccess){
+  modalState = { kind:'password', error:'', onSuccess };
+  renderModal();
+}
+
+function closeModal(){
+  modalState = null;
+  renderModal();
+}
+
+function modalConfirmYes(){
+  if(!modalState || modalState.kind!=='confirm') return;
+  const cb = modalState.onYes;
+  closeModal();
+  if(cb) cb();
+}
+
+function submitModalPassword(){
+  if(!modalState || modalState.kind!=='password') return;
+  const inp = document.getElementById('modalPasswordInput');
+  const val = inp ? inp.value : '';
+  if(val === MANAGEMENT_PASSWORD){
+    const cb = modalState.onSuccess;
+    closeModal();
+    if(cb) cb();
+  } else {
+    modalState = Object.assign({}, modalState, { error:'パスワードが違います' });
+    renderModal();
+  }
+}
+
+function renderModal(){
+  let el = document.getElementById('modalEl');
+  if(!modalState){
+    if(el) el.remove();
+    return;
+  }
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'modalEl';
+    el.className = 'modal-overlay';
+    document.getElementById('app').appendChild(el);
+  }
+  if(modalState.kind==='confirm'){
+    el.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-message">${escapeHtml(modalState.message)}</div>
+        <div class="modal-actions">
+          <button class="btn ghost block" data-action="modalCancel">キャンセル</button>
+          <button class="btn gold block" data-action="modalConfirmYes">OK</button>
+        </div>
+      </div>
+    `;
+  } else if(modalState.kind==='password'){
+    el.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-message">パスワードを入力してください</div>
+        <input type="password" inputmode="numeric" autocomplete="off" class="modal-input" id="modalPasswordInput">
+        ${modalState.error ? `<div class="modal-error">${escapeHtml(modalState.error)}</div>` : ''}
+        <div class="modal-actions">
+          <button class="btn ghost block" data-action="modalCancel">キャンセル</button>
+          <button class="btn gold block" data-action="modalPasswordSubmit">確認</button>
+        </div>
+      </div>
+    `;
+    const inp = document.getElementById('modalPasswordInput');
+    if(inp){
+      inp.focus();
+      inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitModalPassword(); });
+    }
+  }
+  el.onclick = (e)=>{ if(e.target===el) closeModal(); };
+}
+
+/* ---------- settings ---------- */
+function renderSettings(main){
+  if(!db){
+    main.innerHTML = '<div class="empty-hint">この端末ではデータ保存を利用できません</div>';
+    return;
+  }
+  main.innerHTML = `
+    <div class="section-title">スタッフ一覧</div>
+    <div class="card">
+      ${staffList.length ? staffList.map(s => `
+        <div class="row settings-row">
+          <div class="staff-dot" style="background:${colorFor(s.id)}"></div>
+          <div class="settings-name">${escapeHtml(s.name)}</div>
+          <button class="btn small danger outline" data-action="removeStaff" data-id="${escapeHtml(s.id)}">削除</button>
+        </div>
+      `).join('') : '<div class="empty-hint">スタッフが登録されていません</div>'}
+    </div>
+    <div class="section-title">スタッフを追加</div>
+    <div class="card">
+      <div class="row">
+        <input type="text" id="newStaffInput" placeholder="名前を入力">
+        <button class="btn gold" data-action="addStaff">追加</button>
+      </div>
+    </div>
+    <div class="section-title">出退勤データの書き出し</div>
+    <div class="card">
+      <div class="row">
+        <input type="month" id="exportMonthInput" value="${escapeHtml(monthKeyOf(new Date()))}">
+      </div>
+      <button class="btn gold block" id="exportExcelBtn" data-action="exportExcel" style="margin-top:10px;">Excelで書き出す</button>
+      <div class="hint" style="margin:10px 0 0;">スタッフごとにまとまった状態で、出勤・退勤の時刻が入ったCSVファイルが書き出されるよ（Excelでそのまま開けるよ）</div>
+    </div>
+    <div class="hint" style="margin-top:22px;">バージョン ${escapeHtml(BUILD_STAMP)}</div>
+  `;
+  const input = document.getElementById('newStaffInput');
+  if(input){
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addStaff(); });
+  }
+}
+
+function genStaffId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+function addStaff(){
+  const input = document.getElementById('newStaffInput');
+  if(!input) return;
+  const name = input.value.trim();
+  if(!name) return;
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  showConfirmModal('「' + name + '」を追加しますか？', ()=>doAddStaff(name));
+}
+
+async function doAddStaff(name){
+  const input = document.getElementById('newStaffInput');
+  const newList = staffList.concat([{ id: genStaffId(), name }]);
+  if(input) input.disabled = true;
+  try{
+    await db.doc('config/staff').set({ list:newList });
+    if(input) input.value = '';
+  }catch(e){
+    showToast('追加に失敗しました');
+  }
+  if(input) input.disabled = false;
+}
+
+function removeStaff(id){
+  const staff = staffList.find(s=>s.id===id);
+  if(!staff) return;
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  showConfirmModal(staff.name + ' を削除しますか？', ()=>doRemoveStaff(id));
+}
+
+async function doRemoveStaff(id){
+  const newList = staffList.filter(s=>s.id!==id);
+  try{
+    await db.doc('config/staff').set({ list:newList });
+  }catch(e){
+    showToast('削除に失敗しました');
+  }
+}
+
+/* ---------- Excel export ---------- */
+let exportingExcel = false;
+
+// Plain browser download — no platform "save this file?" prompt to ask,
+// just the normal save-to-downloads behavior any site gets.
+function browserDownload(filename, blob){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+async function exportAttendanceExcel(){
+  if(exportingExcel) return;
+  const monthInput = document.getElementById('exportMonthInput');
+  const monthKey = (monthInput && monthInput.value) ? monthInput.value : monthKeyOf(new Date());
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  if(!staffList.length){ showToast('スタッフが登録されていません'); return; }
+
+  exportingExcel = true;
+  const btn = document.getElementById('exportExcelBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '書き出し中…'; }
+
+  try{
+    // Every event, per staff member, for the selected month — one flat
+    // chronological log per person (grouped by staff, so each person's
+    // rows sit together) rather than paired shifts, since a late-night
+    // shift can cross midnight into the next day bucket and guessing at
+    // pairing could show a wrong worked-hours figure.
+    const allRows = [];
+    for(const s of staffList){
+      let data = null;
+      try{
+        const snap = await db.doc('attendance/' + s.id + '_' + monthKey).get();
+        data = snap.exists ? snap.data() : null;
+      }catch(e){ data = null; }
+      const days = (data && data.days) || {};
+      Object.keys(days).sort().forEach(dayKey=>{
+        const events = (days[dayKey] && Array.isArray(days[dayKey].events)) ? days[dayKey].events.slice() : [];
+        events.sort((a,b)=>a.ts-b.ts).forEach(ev=>{
+          allRows.push({ staffName: s.name, date: monthKey + '-' + dayKey, time: ev.time, type: ev.type==='in' ? '出勤' : '退勤' });
+        });
+      });
+    }
+
+    if(!allRows.length){
+      showToast('この月の記録はありません');
+      return;
+    }
+
+    // Plain CSV: Excel opens this natively, and it needs no extra library
+    // or network fetch to build (unlike a real .xlsx), so there's nothing
+    // that can hang while generating it.
+    const header = ['スタッフ','日付','時刻','区分'];
+    const lines = [header.map(csvField).join(',')];
+    allRows.forEach(r=>{ lines.push([r.staffName, r.date, r.time, r.type].map(csvField).join(',')); });
+    const csvText = '﻿' + lines.join('\r\n') + '\r\n';
+    const blob = new Blob([csvText], { type:'text/csv' });
+    const filename = 'X8_出退勤_' + monthKey + '.csv';
+
+    browserDownload(filename, blob);
+  }catch(e){
+    showToast('書き出しに失敗しました');
+  }finally{
+    exportingExcel = false;
+    if(btn){ btn.disabled = false; btn.textContent = 'Excelで書き出す'; }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
