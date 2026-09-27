@@ -265,7 +265,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-1 - 2026-09-26';
+const BUILD_STAMP = 'web-2 - 2026-09-28';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -378,8 +378,9 @@ let lightboxSrc = '';
 
 const STAFF_COLORS = ['#cda449','#7d8cff','#38caa0','#e5535a','#c98bd8','#5fb0d9','#e6a15c','#7ad1c9'];
 
-/* A few lines mixed in below are real, widely-quoted meigen (sourced from
-   published quote roundups), kept verbatim but shown without attribution. */
+/* A few lines mixed in below are real meigen — historical figures and
+   classic work proverbs, each properly attributed via `by`. Roland is
+   deliberately left out of this rotation for now. */
 const HYPE_MESSAGES_IN = [
   { text: 'さあ、今夜も魅せてこう🔥' },
   { text: '今夜のNo.1はお前だ、いってらっしゃい！' },
@@ -387,15 +388,15 @@ const HYPE_MESSAGES_IN = [
   { text: '準備OK、最高の一夜にしよう🍾' },
   { text: '今夜も全力でいこう、期待してるよ！' },
   { text: '調子いいね、今日も気持ちよく決めてこい！' },
-  { text: '1回きりの人生だから、自分はエキストラではなく主役でいたい。' },
-  { text: '前例ってなければ作ればいい。' },
-  { text: '緊張は成長痛。' },
-  { text: '笑われるくらいの目標の方が叶える価値ある。' },
-  { text: '自分の人生は自分が主役。' },
-  { text: '反骨心が俺の恩人であり相棒さ。' },
-  { text: '誰もやっていないからこそやりたい。' },
-  { text: 'NOと言えて初めて、その人のYESに価値が生まれる。' },
-  { text: '人生成功したければやるか、やらないかじゃない。やるか、やるかだ。' },
+  { text: '為せば成る、為さねば成らぬ何事も。', by: '上杉鷹山' },
+  { text: '成功する秘訣は、成功するまで続けることである。', by: '松下幸之助' },
+  { text: '成功は99%の失敗に支えられた1%である。', by: '本田宗一郎' },
+  { text: '天才とは1%のひらめきと99%の努力である。', by: 'トーマス・エジソン' },
+  { text: '千里の道も一歩から。', by: '老子' },
+  { text: '初心忘るべからず。', by: '世阿弥' },
+  { text: '夢なき者は理想なし、理想なき者は信念なし。', by: '吉田松陰' },
+  { text: '敬天愛人。', by: '西郷隆盛' },
+  { text: '笑う門には福来る。', by: 'ことわざ' },
 ];
 const OTSUKARE_MESSAGES_OUT = [
   { text: 'お疲れ様、今日もよく頑張った' },
@@ -404,9 +405,12 @@ const OTSUKARE_MESSAGES_OUT = [
   { text: 'お疲れ！今夜も最高だったよ' },
   { text: 'お疲れ様でした、また明日よろしく' },
   { text: 'よく頑張った、今日はゆっくり休んで' },
-  { text: 'これは負けじゃなくて、勝ちの途中なんだ。' },
-  { text: '全力で考え得る全てを出し切れば、どう転んだってプラスになるということを学んだ。' },
-  { text: '今日よりも明日、明日よりもあさって。よりよい自分にアプローチするために頑張っている。' },
+  { text: '継続は力なり。', by: 'ことわざ' },
+  { text: '石の上にも三年。', by: 'ことわざ' },
+  { text: '七転び八起き。', by: 'ことわざ' },
+  { text: '明日は明日の風が吹く。', by: 'ことわざ' },
+  { text: '終わり良ければ全て良し。', by: 'ことわざ' },
+  { text: '小を積んで大と為す。', by: '二宮尊徳' },
 ];
 function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
