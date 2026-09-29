@@ -179,6 +179,9 @@ input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .log-info{flex:1 1 auto; min-width:0;}
 .log-name{font-size:13.5px; font-weight:700; color:var(--text);}
 .log-time{font-size:12px; color:var(--text-faint); font-family:'Oswald',sans-serif;}
+.log-quote{font-size:11.5px; color:var(--text-faint); font-style:italic; margin-top:3px; line-height:1.4;}
+.log-quote-by{font-style:normal; opacity:0.8;}
+.log-subbar{margin-bottom:10px; display:flex; justify-content:flex-end;}
 
 /* ===== lightbox ===== */
 .lightbox{
@@ -265,7 +268,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-2 - 2026-09-28';
+const BUILD_STAMP = 'web-7 - 2026-09-29';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -280,6 +283,13 @@ const FIREBASE_CONFIG = {
 // x8clean's database with X8 OPEN CHECK without ever touching that app's data.
 const DB_PREFIX = 'timecheck';
 function fullPath(path){ return DB_PREFIX + '/' + path; }
+
+// Photos older than this are auto-deleted (see maybeRunPhotoCleanup) so the
+// database doesn't grow forever as nights of clock-ins pile up. This only
+// ever removes the *photo* — the attendance record itself (time, quote,
+// in/out) is never touched by this and is kept forever.
+const PHOTO_RETENTION_DAYS = 90;
+const PHOTO_CLEANUP_MIN_INTERVAL_MS = 24 * 60 * 60 * 1000; // don't re-scan more than once/day
 
 let db = null;
 let rtdb = null;
@@ -333,6 +343,13 @@ function makeCollectionRef(path){
     where(field, op, val){
       return {
         async get(){
+          // Note: this project's RTDB rules reject orderByChild/equalTo
+          // queries without a matching ".indexOn" rule (confirmed — the
+          // server returns "Index not defined"), and that rule can only be
+          // added from the Firebase console, not from client code. So this
+          // stays a plain fetch-and-filter; callers that care about cost
+          // scaling with total history should fetch specific docs directly
+          // instead of using .where() (see loadLogForDate).
           const snap = await fbGet(fbRef(rtdb, fullPath(path)));
           const valObj = snap.exists() ? snap.val() : {};
           const docs = [];
@@ -368,13 +385,21 @@ let capturedPhotoBlob = null;
 let capturedPhotoPreviewUrl = null;
 let submitting = false;
 let successInfo = null;
+let doneInfo = null;
 
 let logDate = new Date();
 let logEntries = null;
 let logLoading = false;
+let showDeletedLog = false;
 
 let lightboxOpen = false;
 let lightboxSrc = '';
+
+// Lets someone find their name by typing part of it instead of hunting
+// through the whole grid once the roster gets big; reset whenever a new
+// person steps up to this shared kiosk so one person's search doesn't
+// linger and confuse the next.
+let staffSearchQuery = '';
 
 const STAFF_COLORS = ['#cda449','#7d8cff','#38caa0','#e5535a','#c98bd8','#5fb0d9','#e6a15c','#7ad1c9'];
 
@@ -487,11 +512,15 @@ function onAppClick(e){
   else if(action==='modalCancel') closeModal();
   else if(action==='modalConfirmYes') modalConfirmYes();
   else if(action==='modalPasswordSubmit') submitModalPassword();
+  else if(action==='deleteLogEntry') deleteLogEntry(el.dataset);
+  else if(action==='restoreLogEntry') restoreLogEntry(el.dataset);
+  else if(action==='toggleShowDeleted'){ showDeletedLog = !showDeletedLog; renderLog(document.getElementById('main')); }
 }
 
 function dismissSuccessNow(){
   if(clockView!=='success') return;
   clockView = 'select'; selectedStaff = null; pendingAction = null; successInfo = null;
+  staffSearchQuery = '';
   renderApp();
 }
 
@@ -511,6 +540,7 @@ function doSwitchTab(t){
   selectedStaff = null;
   pendingAction = null;
   cameraViewBuilt = false;
+  staffSearchQuery = '';
   document.getElementById('headerTitle').textContent = t==='clock' ? '出退勤' : (t==='log' ? '記録ログ' : '設定');
   document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
   if(t==='log') logLoading = true;
@@ -524,6 +554,7 @@ function renderApp(){
     if(clockView==='select') renderClockSelect(main);
     else if(clockView==='camera') renderClockCamera(main);
     else if(clockView==='success') renderClockSuccess(main);
+    else if(clockView==='done') renderClockDone(main);
   } else if(tab==='log'){
     renderLog(main);
   } else if(tab==='settings'){
@@ -541,17 +572,37 @@ function renderClockSelect(main){
     main.innerHTML = '<div class="empty-hint">スタッフが登録されていません<br>「設定」タブから追加してください</div>';
     return;
   }
+  // A search box only earns its place once the roster is big enough that
+  // scanning the whole grid stops being the fastest way to find your name.
+  const showSearch = staffList.length > 8;
   main.innerHTML = `
     <div class="hint">出勤・退勤するスタッフをタップしてください</div>
-    <div class="staff-grid">
-      ${staffList.map(s => `
-        <button class="staff-btn" data-action="selectStaff" data-id="${escapeHtml(s.id)}">
-          <div class="staff-avatar" style="background:${colorFor(s.id)}">${escapeHtml((s.name||'?').slice(0,1))}</div>
-          <div>${escapeHtml(s.name)}</div>
-        </button>
-      `).join('')}
-    </div>
+    ${showSearch ? `<input type="text" id="staffSearchInput" placeholder="名前で検索" value="${escapeHtml(staffSearchQuery)}" style="margin-bottom:12px;">` : ''}
+    <div class="staff-grid" id="staffGrid">${staffGridHtml()}</div>
   `;
+  const searchInput = document.getElementById('staffSearchInput');
+  if(searchInput){
+    // Updates only the grid's own innerHTML (never re-running
+    // renderClockSelect as a whole) so the input never gets torn down and
+    // rebuilt mid-keystroke — that would drop focus and the cursor
+    // position after every single character typed.
+    searchInput.addEventListener('input', ()=>{
+      staffSearchQuery = searchInput.value;
+      const grid = document.getElementById('staffGrid');
+      if(grid) grid.innerHTML = staffGridHtml();
+    });
+  }
+}
+function staffGridHtml(){
+  const q = staffSearchQuery.trim();
+  const filtered = q ? staffList.filter(s => (s.name||'').includes(q)) : staffList;
+  if(!filtered.length) return '<div class="empty-hint" style="grid-column:1/-1;">見つかりませんでした</div>';
+  return filtered.map(s => `
+    <button class="staff-btn" data-action="selectStaff" data-id="${escapeHtml(s.id)}">
+      <div class="staff-avatar" style="background:${colorFor(s.id)}">${escapeHtml((s.name||'?').slice(0,1))}</div>
+      <div>${escapeHtml(s.name)}</div>
+    </button>
+  `).join('');
 }
 
 /* ---------- clock: camera ---------- */
@@ -666,13 +717,22 @@ function blobToDataUrl(blob){
    own db document (see doCapture) rather than through the assets/blob
    capability, so viewing never depends on a separate blob fetch resolving
    correctly. Tries progressively smaller/lower-quality encodes until the
-   result comfortably clears the per-document size cap. */
+   result comfortably clears the per-document size cap.
+   These photos are a quick "was it really them" glance, not a print or a
+   forensic record, so a fairly aggressive cap is fine — it keeps the
+   long-run database size from creeping up as nights of clock-ins pile up.
+   The cap is deliberately checked against the *actual encoded size* rather
+   than trusted to a single width/quality guess, because the same quality
+   number can produce very different file sizes on different phones'
+   camera/browser encoders — this loop adapts either way. */
 async function makeInlinePhotoDataUrl(){
   const attempts = [
-    { w: 480, q: 0.7 },
-    { w: 480, q: 0.5 },
-    { w: 400, q: 0.4 },
-    { w: 320, q: 0.35 },
+    { w: 360, q: 0.6 },
+    { w: 320, q: 0.5 },
+    { w: 280, q: 0.4 },
+    { w: 240, q: 0.35 },
+    { w: 200, q: 0.3 },
+    { w: 160, q: 0.3 },
   ];
   let img;
   try{ img = await loadImageFromFile(capturedPhotoBlob); }catch(e){ return null; }
@@ -684,7 +744,7 @@ async function makeInlinePhotoDataUrl(){
     const smallBlob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',a.q));
     if(!smallBlob) continue;
     const dataUrl = await blobToDataUrl(smallBlob);
-    if(dataUrl.length < 200000) return dataUrl;
+    if(dataUrl.length < 60000) return dataUrl;
   }
   return null;
 }
@@ -713,15 +773,33 @@ async function resolvePendingAction(){
   const fetched = {};
   for(const m of monthsNeeded){ fetched[m] = await fetchMonthDoc(staff.id, m); }
 
-  let events = [];
   const curDays = (fetched[curMonth] && fetched[curMonth].days) || {};
   const yDays = (fetched[yMonth] && fetched[yMonth].days) || {};
-  if(curDays[curDay] && curDays[curDay].events) events = events.concat(curDays[curDay].events);
-  if(yDays[yDay] && yDays[yDay].events) events = events.concat(yDays[yDay].events);
+
+  // A day's cap is 1 出勤 + 1 退勤, checked against *today's own* events
+  // only (soft-deleting a mistaken entry frees that slot back up). If
+  // today isn't capped yet, yesterday's trailing event still decides
+  // in/out *direction* when today has no events yet, so an overnight
+  // shift crossing midnight still resolves to "退勤" first.
+  const todayEvents = ((curDays[curDay] && curDays[curDay].events) || []).filter(e=>!e.deleted);
+  const hasInToday = todayEvents.some(e=>e.type==='in');
+  const hasOutToday = todayEvents.some(e=>e.type==='out');
+
+  if(selectedStaff !== staff) return; // user navigated away meanwhile
+
+  if(hasInToday && hasOutToday){
+    doneInfo = { name: staff.name };
+    clockView = 'done';
+    cameraViewBuilt = false;
+    renderApp();
+    return;
+  }
+
+  let events = todayEvents.slice();
+  if(yDays[yDay] && yDays[yDay].events) events = events.concat(yDays[yDay].events.filter(e=>!e.deleted));
   events.sort((a,b)=>a.ts-b.ts);
   const last = events.length ? events[events.length-1] : null;
 
-  if(selectedStaff !== staff) return; // user navigated away meanwhile
   pendingAction = (last && last.type==='in') ? 'out' : 'in';
   if(clockView==='camera') updateCameraViewState();
 }
@@ -745,6 +823,7 @@ function cancelClock(){
   selectedStaff = null;
   pendingAction = null;
   cameraViewBuilt = false;
+  staffSearchQuery = '';
   renderApp();
 }
 
@@ -762,6 +841,27 @@ async function doCapture(){
   if(retakeBtn) retakeBtn.disabled = true;
 
   const now = new Date();
+
+  // Defensive re-check: resolvePendingAction ran when this screen opened,
+  // but framing/retaking a photo can take a while, so re-confirm the
+  // daily cap right before writing in case today's 出勤+退勤 pair got
+  // completed elsewhere in the meantime.
+  try{
+    const monthDoc = await fetchMonthDoc(staff.id, monthKeyOf(now));
+    const dayKey0 = dayKeyOf(now);
+    const todayNow = ((monthDoc && monthDoc.days && monthDoc.days[dayKey0] && monthDoc.days[dayKey0].events) || []).filter(e=>!e.deleted);
+    const hasInNow = todayNow.some(e=>e.type==='in');
+    const hasOutNow = todayNow.some(e=>e.type==='out');
+    if(hasInNow && hasOutNow){
+      submitting = false;
+      resetPhotoState();
+      doneInfo = { name: staff.name };
+      clockView = 'done'; cameraViewBuilt = false;
+      renderApp();
+      return;
+    }
+  }catch(e){ /* can't confirm — fall through and let the normal save proceed */ }
+
   let photoRef = null;
 
   // Photos are stored inline as a compressed data URL in their own small
@@ -778,7 +878,12 @@ async function doCapture(){
 
   const monthKey = monthKeyOf(now);
   const dayKey = dayKeyOf(now);
-  const event = { type:action, time:timeStrOf(now), ts: now.getTime() };
+  const message = action==='in' ? pickRandom(HYPE_MESSAGES_IN) : pickRandom(OTSUKARE_MESSAGES_OUT);
+  const event = {
+    id: 'ev' + now.getTime().toString(36) + Math.random().toString(36).slice(2,7),
+    type:action, time:timeStrOf(now), ts: now.getTime(),
+    quote: { text: message.text, by: message.by || null }
+  };
   if(photoRef) event.photo = photoRef;
   const photoAttachFailed = !photoRef;
 
@@ -816,7 +921,6 @@ async function doCapture(){
 
   resetPhotoState();
   if(photoAttachFailed) showToast('記録は完了しましたが、写真の保存に失敗しました');
-  const message = action==='in' ? pickRandom(HYPE_MESSAGES_IN) : pickRandom(OTSUKARE_MESSAGES_OUT);
   successInfo = { name: staff.name, action, time: timeStrOf(now), message: message.text, messageBy: message.by || null };
   clockView = 'success';
   cameraViewBuilt = false;
@@ -840,6 +944,17 @@ function renderClockSuccess(main){
   `;
 }
 
+function renderClockDone(main){
+  main.innerHTML = `
+    <div class="success-wrap">
+      <div class="success-check" style="background:var(--gold-soft); border-color:var(--gold); color:var(--gold);">✓</div>
+      <div class="success-name">${escapeHtml(doneInfo.name)}</div>
+      <div class="success-detail">本日の出勤・退勤は記録済みです</div>
+      <button class="btn ghost block" data-action="cancelClock" style="margin-top:22px; max-width:200px;">戻る</button>
+    </div>
+  `;
+}
+
 /* ---------- log ---------- */
 function renderLog(main){
   main.innerHTML = `
@@ -847,6 +962,9 @@ function renderLog(main){
       <button class="btn icon-only ghost" data-action="logPrev">‹</button>
       <div class="log-date">${dateLabel(logDate)}</div>
       <button class="btn icon-only ghost" data-action="logNext" ${isToday(logDate) ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="log-subbar">
+      <button class="btn ghost small" data-action="toggleShowDeleted">${showDeletedLog ? '← 通常の記録に戻る' : '🗑 削除済みを見る'}</button>
     </div>
     <div class="card" id="logListWrap">${logListHtml()}</div>
   `;
@@ -875,8 +993,11 @@ window.handleLightboxImgError = function(imgEl){
 
 function logListHtml(){
   if(logLoading) return '<div class="empty-hint">読み込み中…</div>';
-  if(!logEntries || logEntries.length===0) return '<div class="empty-hint">この日の記録はありません</div>';
-  return logEntries.map(e => `
+  const list = (logEntries || []).filter(e => showDeletedLog ? e.deleted : !e.deleted);
+  if(list.length===0){
+    return `<div class="empty-hint">${showDeletedLog ? '削除済みの記録はありません' : 'この日の記録はありません'}</div>`;
+  }
+  return list.map(e => `
     <div class="log-row">
       ${e.photoSrc
         ? `<img class="log-thumb" src="${e.photoSrc}" data-action="openLightbox" data-full="${e.photoSrc}" onerror="handleLogThumbError(this)">`
@@ -884,8 +1005,12 @@ function logListHtml(){
       <div class="log-info">
         <div class="log-name">${escapeHtml(e.staffName)}</div>
         <div class="log-time">${e.time}</div>
+        ${e.quote && e.quote.text ? `<div class="log-quote">${e.quote.by ? '“' : ''}${escapeHtml(e.quote.text)}${e.quote.by ? '”' : ''}${e.quote.by ? ` <span class="log-quote-by">— ${escapeHtml(e.quote.by)}</span>` : ''}</div>` : ''}
       </div>
       <div class="pill ${e.type==='in' ? 'in' : 'out'}">${e.type==='in' ? '出勤' : '退勤'}</div>
+      <button class="btn ghost small" data-action="${e.deleted ? 'restoreLogEntry' : 'deleteLogEntry'}"
+        data-staff-id="${escapeHtml(e.staffId||'')}" data-month="${escapeHtml(e.monthKey||'')}" data-day="${escapeHtml(e.dayKey||'')}"
+        data-eid="${escapeHtml(e.eid||'')}" data-name="${escapeHtml(e.staffName||'')}" data-type="${e.type}">${e.deleted ? '復元' : '🗑'}</button>
     </div>
   `).join('');
 }
@@ -905,13 +1030,39 @@ async function loadLogForDate(){
   let entries = [];
   if(db){
     try{
-      const snap = await db.collection('attendance').where('month','==',monthKey).get();
-      snap.docs.forEach(d=>{
-        const data = d.data();
+      // Fetch each known staff member's own month-doc directly (the same
+      // targeted attendance/{id}_{monthKey} path exportAttendanceExcel
+      // already uses) instead of scanning the whole attendance collection
+      // — that used to re-download every staff member's *entire* history
+      // on every single log view, and only got heavier the longer the
+      // club stayed open. This way the read cost scales with headcount
+      // (current + ever-removed, via the archive below), which stays
+      // small, not with total months of history.
+      const idMap = {};
+      staffList.forEach(s=>{ idMap[s.id] = s.name; });
+      try{
+        const archiveSnap = await db.doc('config/staffArchive').get();
+        const archive = (archiveSnap.exists && archiveSnap.data()) || {};
+        Object.keys(archive).forEach(id=>{ if(!(id in idMap)) idMap[id] = archive[id]; });
+      }catch(e){ /* archive is best-effort; current roster alone still works */ }
+
+      const docs = await Promise.all(Object.keys(idMap).map(async id=>{
+        try{
+          const dsnap = await db.doc('attendance/' + id + '_' + monthKey).get();
+          return dsnap.exists ? dsnap.data() : null;
+        }catch(e){ return null; }
+      }));
+      docs.forEach(data=>{
+        if(!data) return;
         const dayData = data.days && data.days[dayKey];
         if(dayData && Array.isArray(dayData.events)){
           dayData.events.forEach(ev=>{
-            entries.push({ staffName: data.staffName || data.staffId || '?', type: ev.type, time: ev.time, ts: ev.ts, photo: ev.photo || null });
+            entries.push({
+              staffId: data.staffId || null, staffName: data.staffName || data.staffId || '?',
+              monthKey, dayKey, eid: ev.id || ('ts:'+ev.ts),
+              type: ev.type, time: ev.time, ts: ev.ts, photo: ev.photo || null,
+              quote: ev.quote || null, deleted: !!ev.deleted
+            });
           });
         }
       });
@@ -939,6 +1090,45 @@ async function loadLogForDate(){
   logEntries = entries;
   logLoading = false;
   if(tab==='log') renderLog(document.getElementById('main'));
+}
+
+// Soft-delete only: a deleted event keeps its data (flagged `deleted:true`)
+// so it can be restored, and it's excluded from the daily in/out cap in
+// resolvePendingAction/doCapture — deleting a mistaken entry immediately
+// frees that staff member's slot again.
+function deleteLogEntry(ds){
+  if(!ds || !ds.staffId || !ds.month || !ds.day || !ds.eid) return;
+  showConfirmModal(
+    ds.name + '（' + (ds.type==='in' ? '出勤' : '退勤') + '）の記録を削除しますか？',
+    ()=>setLogEntryDeleted(ds, true)
+  );
+}
+
+function restoreLogEntry(ds){
+  if(!ds || !ds.staffId || !ds.month || !ds.day || !ds.eid) return;
+  showConfirmModal(
+    ds.name + '（' + (ds.type==='in' ? '出勤' : '退勤') + '）の記録を復元しますか？',
+    ()=>setLogEntryDeleted(ds, false)
+  );
+}
+
+async function setLogEntryDeleted(ds, deletedVal){
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  try{
+    const ref = db.doc('attendance/' + ds.staffId + '_' + ds.month);
+    const snap = await ref.get();
+    if(!snap.exists){ showToast('記録が見つかりません'); return; }
+    const days = snap.data().days || {};
+    const dayObj = days[ds.day];
+    const evs = (dayObj && Array.isArray(dayObj.events)) ? dayObj.events.slice() : [];
+    const idx = evs.findIndex(ev => (ev.id ? ev.id : ('ts:'+ev.ts)) === ds.eid);
+    if(idx===-1){ showToast('記録が見つかりません'); return; }
+    evs[idx] = Object.assign({}, evs[idx], { deleted: deletedVal });
+    await ref.update({ days: { [ds.day]: { events: evs } } });
+    loadLogForDate();
+  }catch(e){
+    showToast(deletedVal ? '削除に失敗しました' : '復元に失敗しました');
+  }
 }
 
 /* ---------- lightbox ---------- */
@@ -1078,12 +1268,90 @@ function renderSettings(main){
       <button class="btn gold block" id="exportExcelBtn" data-action="exportExcel" style="margin-top:10px;">Excelで書き出す</button>
       <div class="hint" style="margin:10px 0 0;">スタッフごとにまとまった状態で、出勤・退勤の時刻が入ったCSVファイルが書き出されるよ（Excelでそのまま開けるよ）</div>
     </div>
+    <div class="section-title">写真データ</div>
+    <div class="card">
+      <div class="hint" id="photoCountHint">読み込み中…</div>
+      <div class="hint" style="margin-top:6px; opacity:0.75;">${PHOTO_RETENTION_DAYS}日より古い写真は自動的に削除されます（出勤・退勤の記録や名言は消えません）</div>
+    </div>
     <div class="hint" style="margin-top:22px;">バージョン ${escapeHtml(BUILD_STAMP)}</div>
   `;
   const input = document.getElementById('newStaffInput');
   if(input){
     input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addStaff(); });
   }
+  loadPhotoCount();
+  maybeRunPhotoCleanup();
+}
+
+/* A cheap "how many photos have piled up" readout, so the count is visible
+   without ever downloading the (much heavier) image data itself: RTDB's
+   REST ?shallow=true returns just the child keys (true/false per key), not
+   their contents, so this stays fast and light even after years of use. */
+let settingsPhotoCountCache = null;
+async function loadPhotoCount(forceRefresh){
+  if(forceRefresh) settingsPhotoCountCache = null;
+  if(settingsPhotoCountCache !== null){
+    const el = document.getElementById('photoCountHint');
+    if(el) el.textContent = photoCountLabel(settingsPhotoCountCache);
+    return;
+  }
+  try{
+    const res = await fetch(FIREBASE_CONFIG.databaseURL + '/' + fullPath('photos') + '.json?shallow=true');
+    const data = await res.json();
+    const count = data ? Object.keys(data).length : 0;
+    settingsPhotoCountCache = count;
+    const el = document.getElementById('photoCountHint');
+    if(el) el.textContent = photoCountLabel(count);
+  }catch(e){
+    const el = document.getElementById('photoCountHint');
+    if(el) el.textContent = '読み込みに失敗しました';
+  }
+}
+function photoCountLabel(count){
+  // Rough scale, not a precise byte count — recent photos run roughly
+  // 30〜60KB each after compression (older ones saved before this could be
+  // a bit bigger), so this stays honest about being an estimate.
+  const roughMb = ((count * 45) / 1024).toFixed(1);
+  return `保存されている写真：${count}枚（目安 約${roughMb}MB）`;
+}
+
+/* Photo ids are 'ph' + the creation time in base36 (a fixed 8 characters
+   from 1976 through 2059) + a short random suffix, so a photo's age can be
+   read straight off its own key — no need to fetch its (much heavier)
+   dataUrl content just to decide whether it's old enough to purge. */
+function tsFromPhotoId(id){
+  if(typeof id !== 'string' || !id.startsWith('ph')) return null;
+  const n = parseInt(id.slice(2, 10), 36);
+  return Number.isFinite(n) ? n : null;
+}
+
+// Runs at most once/day (shared marker in config/, so any admin's device
+// can be the one that happens to run it) and only ever deletes documents
+// under photos/ — attendance/ (the actual time + quote record) is never
+// touched here, matching what was described before turning this on.
+async function maybeRunPhotoCleanup(){
+  try{
+    const markerUrl = FIREBASE_CONFIG.databaseURL + '/' + fullPath('config/photoCleanupLastRun') + '.json';
+    const lastRun = await (await fetch(markerUrl)).json();
+    if(lastRun && (Date.now() - lastRun) < PHOTO_CLEANUP_MIN_INTERVAL_MS) return;
+
+    const listUrl = FIREBASE_CONFIG.databaseURL + '/' + fullPath('photos') + '.json?shallow=true';
+    const data = await (await fetch(listUrl)).json();
+    const keys = data ? Object.keys(data) : [];
+    const cutoff = Date.now() - PHOTO_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const toDelete = keys.filter(k => { const t = tsFromPhotoId(k); return t !== null && t < cutoff; });
+
+    if(toDelete.length){
+      const patch = {};
+      toDelete.forEach(k => { patch[k] = null; });
+      await fetch(FIREBASE_CONFIG.databaseURL + '/' + fullPath('photos') + '.json', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch)
+      });
+      loadPhotoCount(true);
+    }
+
+    await fetch(markerUrl, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Date.now()) });
+  }catch(e){ /* best-effort background maintenance; simply retried on the next visit */ }
 }
 
 function genStaffId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
@@ -1099,11 +1367,13 @@ function addStaff(){
 
 async function doAddStaff(name){
   const input = document.getElementById('newStaffInput');
-  const newList = staffList.concat([{ id: genStaffId(), name }]);
+  const newStaff = { id: genStaffId(), name };
+  const newList = staffList.concat([newStaff]);
   if(input) input.disabled = true;
   try{
     await db.doc('config/staff').set({ list:newList });
     if(input) input.value = '';
+    mergeIntoStaffArchive(newStaff.id, newStaff.name);
   }catch(e){
     showToast('追加に失敗しました');
   }
@@ -1118,12 +1388,36 @@ function removeStaff(id){
 }
 
 async function doRemoveStaff(id){
+  const staff = staffList.find(s=>s.id===id);
   const newList = staffList.filter(s=>s.id!==id);
   try{
     await db.doc('config/staff').set({ list:newList });
+    // Removing someone from the active roster must not erase their past
+    // attendance from the log — archive their id→name permanently so
+    // loadLogForDate can still find their history after this point.
+    if(staff) mergeIntoStaffArchive(staff.id, staff.name);
   }catch(e){
     showToast('削除に失敗しました');
   }
+}
+
+// A permanent id→name record of every staff member who has ever existed,
+// separate from config/staff's *current* roster. loadLogForDate fetches
+// each known id's own attendance doc directly (cheap, scales with
+// headcount) instead of scanning the whole attendance collection (which
+// used to re-download every staff member's entire history on every log
+// view) — this archive is what lets a removed staff member's past
+// records still show up there.
+async function mergeIntoStaffArchive(id, name){
+  try{
+    const ref = db.doc('config/staffArchive');
+    const snap = await ref.get();
+    const archive = (snap.exists && snap.data()) || {};
+    if(archive[id] !== name){
+      archive[id] = name;
+      await ref.set(archive);
+    }
+  }catch(e){ /* best-effort bookkeeping — loadLogForDate still works off whatever's already archived */ }
 }
 
 /* ---------- Excel export ---------- */
