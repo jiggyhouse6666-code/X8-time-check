@@ -134,8 +134,17 @@ input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .staff-btn:active{transform:scale(0.96); border-color:var(--gold);}
 .staff-avatar{
   width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-family:'Oswald',sans-serif; font-weight:700; font-size:17px; color:#1a1520;
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:17px; color:#1a1520; object-fit:cover;
 }
+.staff-avatar-wrap{position:relative; flex:0 0 auto;}
+.staff-avatar-btn{padding:0; border:none; background:none; border-radius:50%; line-height:0; cursor:pointer;}
+.staff-avatar-btn .staff-avatar{border:1px solid var(--border);}
+.staff-avatar-remove{
+  position:absolute; top:-3px; right:-3px; width:16px; height:16px; border-radius:50%; min-height:0;
+  background:var(--danger); color:#fff; border:1.5px solid var(--bg-elev); font-size:10px; line-height:1;
+  display:flex; align-items:center; justify-content:center; padding:0;
+}
+.cam-avatar-row{display:flex; justify-content:center; margin-bottom:10px;}
 
 /* ===== camera / clock view ===== */
 .cam-card{padding:16px;}
@@ -268,7 +277,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-7 - 2026-09-29';
+const BUILD_STAMP = 'web-11 - 2026-09-30';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -369,6 +378,16 @@ function genPushId(){ return Date.now().toString(36) + Math.random().toString(36
 let staffList = [];
 let unsubStaff = null;
 
+// 宣材写真 (promotional photo) per staff member, keyed by staff id, kept in
+// its own db node (staffPhotos/) rather than embedded in config/staff so
+// that the frequently live-synced staff list stays small — this is instead
+// fetched as one plain REST GET, cached for a while, and refreshed whenever
+// the clock tab is opened (throttled below so that's cheap, not a re-fetch
+// on every single tap).
+let staffPhotos = {};
+let staffPhotosLoadedAt = 0;
+const STAFF_PHOTOS_REFRESH_MS = 10 * 60 * 1000;
+
 // Gate on the ログ (log/history, with photos) and 設定 (staff list, export)
 // tabs, so the shared clock-in device can sit out for anyone to tap 打刻
 // without also exposing everyone's history. Resets on reload — it's a
@@ -381,6 +400,9 @@ let clockView = 'select';
 let cameraViewBuilt = false;
 let selectedStaff = null;
 let pendingAction = null;
+// Which of 出勤/退勤 can still be picked today for the staff member currently
+// on the chooseAction screen — null while that's still being fetched.
+let chooseActionAvailability = null;
 let capturedPhotoBlob = null;
 let capturedPhotoPreviewUrl = null;
 let submitting = false;
@@ -401,6 +423,10 @@ let lightboxSrc = '';
 // linger and confuse the next.
 let staffSearchQuery = '';
 
+// Which staff row (if any) is currently showing its name as an editable
+// <input> instead of plain text, in 設定 → スタッフ一覧.
+let editingStaffId = null;
+
 const STAFF_COLORS = ['#cda449','#7d8cff','#38caa0','#e5535a','#c98bd8','#5fb0d9','#e6a15c','#7ad1c9'];
 
 /* A few lines mixed in below are real meigen — historical figures and
@@ -413,6 +439,12 @@ const HYPE_MESSAGES_IN = [
   { text: '準備OK、最高の一夜にしよう🍾' },
   { text: '今夜も全力でいこう、期待してるよ！' },
   { text: '調子いいね、今日も気持ちよく決めてこい！' },
+  { text: '今夜も最高の一夜にしよう！' },
+  { text: 'お前の実力、見せつけてやれ！' },
+  { text: 'さあ行くぞ、今夜も全開で！🔥' },
+  { text: '今夜も自己ベスト更新だ！' },
+  { text: '笑顔全開でいこう、それが一番の武器だ！' },
+  { text: '今日のお前が一番強い、いってらっしゃい！' },
   { text: '為せば成る、為さねば成らぬ何事も。', by: '上杉鷹山' },
   { text: '成功する秘訣は、成功するまで続けることである。', by: '松下幸之助' },
   { text: '成功は99%の失敗に支えられた1%である。', by: '本田宗一郎' },
@@ -422,6 +454,12 @@ const HYPE_MESSAGES_IN = [
   { text: '夢なき者は理想なし、理想なき者は信念なし。', by: '吉田松陰' },
   { text: '敬天愛人。', by: '西郷隆盛' },
   { text: '笑う門には福来る。', by: 'ことわざ' },
+  { text: 'ハングリーであれ。愚か者であれ。', by: 'スティーブ・ジョブズ' },
+  { text: '明日死ぬかのように生きなさい。永遠に生きるかのように学びなさい。', by: 'マハトマ・ガンジー' },
+  { text: '小さいことを積み重ねることが、とんでもないところへ行くただ一つの道だと思っています。', by: 'イチロー' },
+  { text: '世に生を得るは事を成すにあり。', by: '坂本龍馬' },
+  { text: '誰にも負けない努力をする。', by: '稲盛和夫' },
+  { text: '始めるための方法は、話すのをやめて行動することだ。', by: 'ウォルト・ディズニー' },
 ];
 const OTSUKARE_MESSAGES_OUT = [
   { text: 'お疲れ様、今日もよく頑張った' },
@@ -430,6 +468,24 @@ const OTSUKARE_MESSAGES_OUT = [
   { text: 'お疲れ！今夜も最高だったよ' },
   { text: 'お疲れ様でした、また明日よろしく' },
   { text: 'よく頑張った、今日はゆっくり休んで' },
+  { text: '今日のお前、ちゃんと頑張ってたよ' },
+  { text: '誰が何と言おうと、今夜のお前はよくやった' },
+  { text: '自分を褒めてあげような、今日も' },
+  { text: '無理しすぎず、また明日も自分らしくいこう' },
+  { text: '今日という日を生き切った、それでいい' },
+  { text: 'ゆっくり休んで、また明日の自分に会おう' },
+  // 自己肯定感の上がる名言（偉人の言葉）。テンションを上げるだけでなく、
+  // 今日の自分そのものを肯定できるような一言を退勤時に。
+  { text: 'つまづいたっていいじゃないか にんげんだもの', by: '相田みつを' },
+  { text: '君は君 我は我也 されど仲良き', by: '武者小路実篤' },
+  { text: '自分の運命に楽観的であれ。', by: '岡本太郎' },
+  { text: '大きなことができる人は多くありません。でも、小さなことを大きな愛をもって行うことはできます。', by: 'マザー・テレサ' },
+  { text: '天は人の上に人を造らず人の下に人を造らずと云えり。', by: '福沢諭吉' },
+  { text: '自分に自信を持て。自信を持てば、大きな力が出てくるものだ。', by: '松下幸之助' },
+  { text: '何事も、成し遂げるまでは不可能に思えるものだ。', by: 'ネルソン・マンデラ' },
+  { text: '人生に何を期待するかではなく、人生が私たちに何を期待しているかが重要なのだ。', by: 'ヴィクトール・フランクル' },
+  { text: 'やってみせ、言って聞かせて、させてみせ、ほめてやらねば、人は動かじ。', by: '山本五十六' },
+  { text: '世界で最も素晴らしく美しいものは、目で見ることも、手で触れることもできない。心で感じるものなのだ。', by: 'ヘレン・ケラー' },
   { text: '継続は力なり。', by: 'ことわざ' },
   { text: '石の上にも三年。', by: 'ことわざ' },
   { text: '七転び八起き。', by: 'ことわざ' },
@@ -454,6 +510,20 @@ function dateLabel(d){ return (d.getMonth()+1) + '月' + d.getDate() + '日（' 
 function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function colorFor(id){ let h=0; for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0; return STAFF_COLORS[h % STAFF_COLORS.length]; }
 
+// Renders a staff member's 宣材写真 (promotional photo) as a circular <img>
+// when one has been uploaded (see staffPhotos), falling back to the same
+// colored-initial circle as before when it hasn't — so an empty roster of
+// photos looks exactly like it did before this feature existed. `size` is
+// an optional pixel override for contexts smaller/larger than the default
+// grid avatar (e.g. the compact row in 設定, or the bigger one on the
+// camera confirm screen).
+function avatarHtml(s, size){
+  const photo = staffPhotos[s.id];
+  const dims = size ? `width:${size}px;height:${size}px;font-size:${Math.round(size*0.38)}px;` : '';
+  if(photo) return `<img class="staff-avatar" style="${dims}" src="${photo}" alt="">`;
+  return `<div class="staff-avatar" style="${dims}background:${colorFor(s.id)}">${escapeHtml((s.name||'?').slice(0,1))}</div>`;
+}
+
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -469,6 +539,7 @@ async function init(){
     db = { doc: makeDocRef, collection: makeCollectionRef };
   }catch(e){ db = null; rtdb = null; }
   subscribeStaff();
+  loadStaffPhotos();
   renderApp();
   setInterval(()=>{
     const el = document.getElementById('headerClock');
@@ -492,6 +563,27 @@ function subscribeStaff(){
   );
 }
 
+/* Loads every staffPhotos/{id} dataUrl in one plain REST GET (not the
+   onSnapshot/SDK path, same style as loadPhotoCount below). Not live —
+   photos change rarely, and re-streaming several MB of image data to every
+   open tab on every edit isn't worth it — so this is throttled and re-run
+   opportunistically (app start, and each time the clock tab is opened)
+   rather than on a subscription. `force` bypasses the throttle right after
+   this device itself changes a photo. */
+async function loadStaffPhotos(force){
+  if(!db) return;
+  if(!force && staffPhotosLoadedAt && (Date.now() - staffPhotosLoadedAt) < STAFF_PHOTOS_REFRESH_MS) return;
+  try{
+    const res = await fetch(FIREBASE_CONFIG.databaseURL + '/' + fullPath('staffPhotos') + '.json');
+    const data = await res.json();
+    const next = {};
+    if(data) for(const id in data){ if(data[id] && data[id].dataUrl) next[id] = data[id].dataUrl; }
+    staffPhotos = next;
+    staffPhotosLoadedAt = Date.now();
+    renderApp();
+  }catch(e){ /* keep whatever was already cached; avatars just fall back to initials */ }
+}
+
 function onAppClick(e){
   const el = e.target.closest('[data-action]');
   if(!el) return;
@@ -499,6 +591,7 @@ function onAppClick(e){
   if(action==='switchTab') switchTab(el.dataset.tab);
   else if(action==='selectStaff'){ const s = staffList.find(x=>x.id===el.dataset.id); if(s) selectStaff(s); }
   else if(action==='cancelClock') cancelClock();
+  else if(action==='chooseInOut') chooseInOut(el.dataset.type);
   else if(action==='doCapture') doCapture();
   else if(action==='retakePhoto') retakePhoto();
   else if(action==='logPrev'){ const d=new Date(logDate); d.setDate(d.getDate()-1); logDate=d; loadLogForDate(); }
@@ -506,7 +599,12 @@ function onAppClick(e){
   else if(action==='openLightbox'){ lightboxOpen=true; lightboxSrc=el.dataset.full; renderLightbox(); }
   else if(action==='closeLightbox'){ lightboxOpen=false; renderLightbox(); }
   else if(action==='removeStaff') removeStaff(el.dataset.id);
+  else if(action==='startEditStaffName') startEditStaffName(el.dataset.id);
+  else if(action==='saveStaffName') saveStaffName(el.dataset.id);
+  else if(action==='cancelEditStaffName') cancelEditStaffName();
   else if(action==='addStaff') addStaff();
+  else if(action==='pickStaffPhoto') pickStaffPhoto(el.dataset.id);
+  else if(action==='removeStaffPhoto') confirmRemoveStaffPhoto(el.dataset.id);
   else if(action==='dismissSuccess') dismissSuccessNow();
   else if(action==='exportExcel') exportAttendanceExcel();
   else if(action==='modalCancel') closeModal();
@@ -546,12 +644,14 @@ function doSwitchTab(t){
   if(t==='log') logLoading = true;
   renderApp();
   if(t==='log') loadLogForDate();
+  if(t==='clock') loadStaffPhotos();
 }
 
 function renderApp(){
   const main = document.getElementById('main');
   if(tab==='clock'){
     if(clockView==='select') renderClockSelect(main);
+    else if(clockView==='chooseAction') renderClockChooseAction(main);
     else if(clockView==='camera') renderClockCamera(main);
     else if(clockView==='success') renderClockSuccess(main);
     else if(clockView==='done') renderClockDone(main);
@@ -599,17 +699,38 @@ function staffGridHtml(){
   if(!filtered.length) return '<div class="empty-hint" style="grid-column:1/-1;">見つかりませんでした</div>';
   return filtered.map(s => `
     <button class="staff-btn" data-action="selectStaff" data-id="${escapeHtml(s.id)}">
-      <div class="staff-avatar" style="background:${colorFor(s.id)}">${escapeHtml((s.name||'?').slice(0,1))}</div>
+      ${avatarHtml(s)}
       <div>${escapeHtml(s.name)}</div>
     </button>
   `).join('');
 }
 
 /* ---------- clock: camera ---------- */
+/* ---------- clock: choose 出勤/退勤 ---------- */
+function renderClockChooseAction(main){
+  const avail = chooseActionAvailability;
+  const loading = avail === null;
+  const inDisabled = loading || !avail.in;
+  const outDisabled = loading || !avail.out;
+  main.innerHTML = `
+    <div class="card cam-card">
+      <div class="cam-avatar-row">${avatarHtml(selectedStaff, 56)}</div>
+      <div class="cam-staffname">${escapeHtml(selectedStaff.name)}</div>
+      <div class="hint" style="text-align:center; margin-bottom:14px;">${loading ? '確認中…' : '出勤・退勤を選んでください'}</div>
+      <button class="btn block big-action gold" data-action="chooseInOut" data-type="in" style="margin-bottom:10px;" ${inDisabled ? 'disabled' : ''}>出勤する</button>
+      <button class="btn block big-action outbtn" data-action="chooseInOut" data-type="out" ${outDisabled ? 'disabled' : ''}>退勤する</button>
+      ${(!loading && !avail.in) ? '<div class="hint" style="text-align:center; margin-top:10px;">本日の出勤は記録済みです</div>' : ''}
+      ${(!loading && !avail.out) ? '<div class="hint" style="text-align:center; margin-top:10px;">本日の退勤は記録済みです</div>' : ''}
+      <button class="btn ghost block" data-action="cancelClock" style="margin-top:14px">キャンセル</button>
+    </div>
+  `;
+}
+
 function renderClockCamera(main){
   if(!cameraViewBuilt){
     main.innerHTML = `
       <div class="card cam-card">
+        <div class="cam-avatar-row">${avatarHtml(selectedStaff, 56)}</div>
         <div class="cam-staffname">${escapeHtml(selectedStaff.name)}</div>
         <label class="camera-wrap" id="cameraWrap" for="camFileInput">
           <div class="cam-placeholder" id="camPlaceholder">
@@ -627,7 +748,8 @@ function renderClockCamera(main){
     cameraViewBuilt = true;
     const fileInput = document.getElementById('camFileInput');
     if(fileInput) fileInput.addEventListener('change', onPhotoFileSelected);
-    resolvePendingAction();
+    // pendingAction is already set by chooseInOut() before this view is
+    // ever shown, so there's no async resolve step to wait on here anymore.
   }
   updateCameraViewState();
 }
@@ -725,17 +847,35 @@ function blobToDataUrl(blob){
    than trusted to a single width/quality guess, because the same quality
    number can produce very different file sizes on different phones'
    camera/browser encoders — this loop adapts either way. */
-async function makeInlinePhotoDataUrl(){
-  const attempts = [
-    { w: 360, q: 0.6 },
-    { w: 320, q: 0.5 },
-    { w: 280, q: 0.4 },
-    { w: 240, q: 0.35 },
-    { w: 200, q: 0.3 },
-    { w: 160, q: 0.3 },
-  ];
+const CLOCKIN_PHOTO_ATTEMPTS = [
+  { w: 360, q: 0.6 },
+  { w: 320, q: 0.5 },
+  { w: 280, q: 0.4 },
+  { w: 240, q: 0.35 },
+  { w: 200, q: 0.3 },
+  { w: 160, q: 0.3 },
+];
+const CLOCKIN_PHOTO_MAX_CHARS = 60000;
+
+// 宣材写真 (promotional photo): unlike clock-in photos, there's only ever
+// one of these per staff member (a re-upload replaces it, nothing piles
+// up), so there's no need for the same aggressive cap — this aims notably
+// bigger/cleaner since it's meant to actually look good, not just confirm
+// a face at a glance. Even at the largest size below, 55 staff members'
+// worth is a few MB at most — nowhere near a real storage concern.
+const STAFF_PHOTO_ATTEMPTS = [
+  { w: 640, q: 0.78 },
+  { w: 560, q: 0.72 },
+  { w: 480, q: 0.68 },
+  { w: 400, q: 0.6 },
+  { w: 320, q: 0.55 },
+  { w: 240, q: 0.5 },
+];
+const STAFF_PHOTO_MAX_CHARS = 350000;
+
+async function makeCompressedDataUrl(fileOrBlob, attempts, capChars){
   let img;
-  try{ img = await loadImageFromFile(capturedPhotoBlob); }catch(e){ return null; }
+  try{ img = await loadImageFromFile(fileOrBlob); }catch(e){ return null; }
   for(const a of attempts){
     const h = Math.max(1, Math.round(a.w * img.height / img.width));
     const canvas = document.createElement('canvas');
@@ -744,9 +884,12 @@ async function makeInlinePhotoDataUrl(){
     const smallBlob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',a.q));
     if(!smallBlob) continue;
     const dataUrl = await blobToDataUrl(smallBlob);
-    if(dataUrl.length < 60000) return dataUrl;
+    if(dataUrl.length < capChars) return dataUrl;
   }
   return null;
+}
+function makeInlinePhotoDataUrl(){
+  return makeCompressedDataUrl(capturedPhotoBlob, CLOCKIN_PHOTO_ATTEMPTS, CLOCKIN_PHOTO_MAX_CHARS);
 }
 
 function retakePhoto(){
@@ -762,26 +905,19 @@ async function fetchMonthDoc(staffId, monthKey){
   }catch(e){ return null; }
 }
 
-async function resolvePendingAction(){
+// Figures out which of 出勤/退勤 are still open today for the selected staff
+// member, so the chooseAction screen can grey out whichever one is already
+// recorded (soft-deleting a mistaken entry frees that slot back up, same as
+// before). If both are already done, skips straight to the done screen —
+// there's nothing left to choose. Unlike the old auto-resolve, this no
+// longer needs to peek at yesterday's trailing event to *guess* a direction:
+// the person now picks it themselves, so only today's own cap matters.
+async function resolveChooseAction(){
   const staff = selectedStaff;
   const now = new Date();
-  const y = new Date(now); y.setDate(now.getDate()-1);
-  const curMonth = monthKeyOf(now), curDay = dayKeyOf(now);
-  const yMonth = monthKeyOf(y), yDay = dayKeyOf(y);
-
-  const monthsNeeded = Array.from(new Set([curMonth, yMonth]));
-  const fetched = {};
-  for(const m of monthsNeeded){ fetched[m] = await fetchMonthDoc(staff.id, m); }
-
-  const curDays = (fetched[curMonth] && fetched[curMonth].days) || {};
-  const yDays = (fetched[yMonth] && fetched[yMonth].days) || {};
-
-  // A day's cap is 1 出勤 + 1 退勤, checked against *today's own* events
-  // only (soft-deleting a mistaken entry frees that slot back up). If
-  // today isn't capped yet, yesterday's trailing event still decides
-  // in/out *direction* when today has no events yet, so an overnight
-  // shift crossing midnight still resolves to "退勤" first.
-  const todayEvents = ((curDays[curDay] && curDays[curDay].events) || []).filter(e=>!e.deleted);
+  const monthDoc = await fetchMonthDoc(staff.id, monthKeyOf(now));
+  const curDay = dayKeyOf(now);
+  const todayEvents = ((monthDoc && monthDoc.days && monthDoc.days[curDay] && monthDoc.days[curDay].events) || []).filter(e=>!e.deleted);
   const hasInToday = todayEvents.some(e=>e.type==='in');
   const hasOutToday = todayEvents.some(e=>e.type==='out');
 
@@ -790,18 +926,12 @@ async function resolvePendingAction(){
   if(hasInToday && hasOutToday){
     doneInfo = { name: staff.name };
     clockView = 'done';
-    cameraViewBuilt = false;
     renderApp();
     return;
   }
 
-  let events = todayEvents.slice();
-  if(yDays[yDay] && yDays[yDay].events) events = events.concat(yDays[yDay].events.filter(e=>!e.deleted));
-  events.sort((a,b)=>a.ts-b.ts);
-  const last = events.length ? events[events.length-1] : null;
-
-  pendingAction = (last && last.type==='in') ? 'out' : 'in';
-  if(clockView==='camera') updateCameraViewState();
+  chooseActionAvailability = { in: !hasInToday, out: !hasOutToday };
+  if(clockView==='chooseAction') renderApp();
 }
 
 function selectStaff(staff){
@@ -812,6 +942,17 @@ function doSelectStaff(staff){
   resetPhotoState();
   selectedStaff = staff;
   pendingAction = null;
+  chooseActionAvailability = null;
+  clockView = 'chooseAction';
+  cameraViewBuilt = false;
+  renderApp();
+  resolveChooseAction();
+}
+
+// Called when the person taps 出勤する/退勤する on the chooseAction screen.
+function chooseInOut(type){
+  if(!chooseActionAvailability || !chooseActionAvailability[type]) return;
+  pendingAction = type;
   clockView = 'camera';
   cameraViewBuilt = false;
   renderApp();
@@ -822,6 +963,7 @@ function cancelClock(){
   clockView = 'select';
   selectedStaff = null;
   pendingAction = null;
+  chooseActionAvailability = null;
   cameraViewBuilt = false;
   staffSearchQuery = '';
   renderApp();
@@ -842,10 +984,10 @@ async function doCapture(){
 
   const now = new Date();
 
-  // Defensive re-check: resolvePendingAction ran when this screen opened,
-  // but framing/retaking a photo can take a while, so re-confirm the
-  // daily cap right before writing in case today's 出勤+退勤 pair got
-  // completed elsewhere in the meantime.
+  // Defensive re-check: the choice was made (and its availability checked)
+  // back on the chooseAction screen, but framing/retaking a photo can take
+  // a while, so re-confirm the daily cap right before writing in case
+  // today's 出勤+退勤 pair got completed elsewhere in the meantime.
   try{
     const monthDoc = await fetchMonthDoc(staff.id, monthKeyOf(now));
     const dayKey0 = dayKeyOf(now);
@@ -931,6 +1073,9 @@ async function doCapture(){
 
 function renderClockSuccess(main){
   const quoted = !!successInfo.messageBy;
+  // 出勤時の名言は、誰の言葉かは表示せず本文だけ見せる（退勤時のことわざ等は
+  // これまで通り名前つきで表示）。
+  const showBy = quoted && successInfo.action !== 'in';
   main.innerHTML = `
     <div class="success-wrap">
       <div class="success-check">✓</div>
@@ -938,7 +1083,7 @@ function renderClockSuccess(main){
       <div class="success-detail">${successInfo.action==='in' ? '出勤' : '退勤'}　${successInfo.time}</div>
       <div class="success-message ${successInfo.action==='in' ? 'hype' : 'otsukare'}" data-action="dismissSuccess">
         <div>${quoted ? '“' : ''}${escapeHtml(successInfo.message)}${quoted ? '”' : ''}</div>
-        ${quoted ? `<div class="success-message-by">— ${escapeHtml(successInfo.messageBy)}</div>` : ''}
+        ${showBy ? `<div class="success-message-by">— ${escapeHtml(successInfo.messageBy)}</div>` : ''}
       </div>
     </div>
   `;
@@ -1005,7 +1150,7 @@ function logListHtml(){
       <div class="log-info">
         <div class="log-name">${escapeHtml(e.staffName)}</div>
         <div class="log-time">${e.time}</div>
-        ${e.quote && e.quote.text ? `<div class="log-quote">${e.quote.by ? '“' : ''}${escapeHtml(e.quote.text)}${e.quote.by ? '”' : ''}${e.quote.by ? ` <span class="log-quote-by">— ${escapeHtml(e.quote.by)}</span>` : ''}</div>` : ''}
+        ${e.quote && e.quote.text ? `<div class="log-quote">${e.quote.by ? '“' : ''}${escapeHtml(e.quote.text)}${e.quote.by ? '”' : ''}${(e.quote.by && e.type!=='in') ? ` <span class="log-quote-by">— ${escapeHtml(e.quote.by)}</span>` : ''}</div>` : ''}
       </div>
       <div class="pill ${e.type==='in' ? 'in' : 'out'}">${e.type==='in' ? '出勤' : '退勤'}</div>
       <button class="btn ghost small" data-action="${e.deleted ? 'restoreLogEntry' : 'deleteLogEntry'}"
@@ -1058,7 +1203,12 @@ async function loadLogForDate(){
         if(dayData && Array.isArray(dayData.events)){
           dayData.events.forEach(ev=>{
             entries.push({
-              staffId: data.staffId || null, staffName: data.staffName || data.staffId || '?',
+              // Prefer the live name from idMap (current roster, falling back to the
+              // archive) over data.staffName, which is frozen into the month-doc the
+              // moment it's first created and never touched again by later writes
+              // (doCapture's update() branch doesn't include it) — without this, a
+              // rename would never show up on that staff member's past log entries.
+              staffId: data.staffId || null, staffName: (data.staffId && idMap[data.staffId]) || data.staffName || data.staffId || '?',
               monthKey, dayKey, eid: ev.id || ('ts:'+ev.ts),
               type: ev.type, time: ev.time, ts: ev.ts, photo: ev.photo || null,
               quote: ev.quote || null, deleted: !!ev.deleted
@@ -1094,7 +1244,7 @@ async function loadLogForDate(){
 
 // Soft-delete only: a deleted event keeps its data (flagged `deleted:true`)
 // so it can be restored, and it's excluded from the daily in/out cap in
-// resolvePendingAction/doCapture — deleting a mistaken entry immediately
+// resolveChooseAction/doCapture — deleting a mistaken entry immediately
 // frees that staff member's slot again.
 function deleteLogEntry(ds){
   if(!ds || !ds.staffId || !ds.month || !ds.day || !ds.eid) return;
@@ -1245,14 +1395,28 @@ function renderSettings(main){
   main.innerHTML = `
     <div class="section-title">スタッフ一覧</div>
     <div class="card">
-      ${staffList.length ? staffList.map(s => `
+      ${staffList.length ? `
+        <div class="hint" style="margin-bottom:10px;">丸いアイコンをタップすると宣材写真を登録できます</div>
+        ${staffList.map(s => `
         <div class="row settings-row">
-          <div class="staff-dot" style="background:${colorFor(s.id)}"></div>
-          <div class="settings-name">${escapeHtml(s.name)}</div>
-          <button class="btn small danger outline" data-action="removeStaff" data-id="${escapeHtml(s.id)}">削除</button>
+          <div class="staff-avatar-wrap">
+            <button class="staff-avatar-btn" data-action="pickStaffPhoto" data-id="${escapeHtml(s.id)}" title="写真を変更">${avatarHtml(s, 34)}</button>
+            ${staffPhotos[s.id] ? `<button class="staff-avatar-remove" data-action="removeStaffPhoto" data-id="${escapeHtml(s.id)}" title="写真を外す">✕</button>` : ''}
+          </div>
+          ${s.id === editingStaffId ? `
+            <input type="text" id="renameInput-${escapeHtml(s.id)}" value="${escapeHtml(s.name)}" style="flex:1 1 auto; min-width:0; width:auto;">
+            <button class="btn small gold" data-action="saveStaffName" data-id="${escapeHtml(s.id)}">保存</button>
+            <button class="btn small ghost" data-action="cancelEditStaffName">✕</button>
+          ` : `
+            <div class="settings-name">${escapeHtml(s.name)}</div>
+            <button class="btn small ghost" data-action="startEditStaffName" data-id="${escapeHtml(s.id)}" title="名前を編集">✎</button>
+            <button class="btn small danger outline" data-action="removeStaff" data-id="${escapeHtml(s.id)}">削除</button>
+          `}
         </div>
-      `).join('') : '<div class="empty-hint">スタッフが登録されていません</div>'}
+      `).join('')}
+      ` : '<div class="empty-hint">スタッフが登録されていません</div>'}
     </div>
+    <input type="file" accept="image/*" id="staffPhotoFileInput" class="visually-hidden-file">
     <div class="section-title">スタッフを追加</div>
     <div class="card">
       <div class="row">
@@ -1278,6 +1442,19 @@ function renderSettings(main){
   const input = document.getElementById('newStaffInput');
   if(input){
     input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addStaff(); });
+  }
+  const photoInput = document.getElementById('staffPhotoFileInput');
+  if(photoInput) photoInput.addEventListener('change', onStaffPhotoFileSelected);
+  if(editingStaffId){
+    const renameInput = document.getElementById('renameInput-' + editingStaffId);
+    if(renameInput){
+      renameInput.focus();
+      renameInput.select();
+      renameInput.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter') saveStaffName(editingStaffId);
+        else if(e.key==='Escape') cancelEditStaffName();
+      });
+    }
   }
   loadPhotoCount();
   maybeRunPhotoCleanup();
@@ -1380,6 +1557,38 @@ async function doAddStaff(name){
   if(input) input.disabled = false;
 }
 
+// Renaming keeps the same id, so every past log entry, the staffPhotos
+// entry, and config/staffArchive (should they later be removed) all still
+// resolve correctly under the corrected name — nothing else needs updating.
+function startEditStaffName(id){
+  editingStaffId = id;
+  renderApp();
+}
+
+function cancelEditStaffName(){
+  editingStaffId = null;
+  renderApp();
+}
+
+async function saveStaffName(id){
+  const input = document.getElementById('renameInput-' + id);
+  if(!input) return;
+  const newName = input.value.trim();
+  if(!newName){ showToast('名前を入力してください'); return; }
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  const newList = staffList.map(s => s.id===id ? Object.assign({}, s, { name:newName }) : s);
+  input.disabled = true;
+  try{
+    await db.doc('config/staff').set({ list:newList });
+    staffList = newList;
+    editingStaffId = null;
+    renderApp();
+  }catch(e){
+    showToast('名前の変更に失敗しました');
+    input.disabled = false;
+  }
+}
+
 function removeStaff(id){
   const staff = staffList.find(s=>s.id===id);
   if(!staff) return;
@@ -1396,6 +1605,61 @@ async function doRemoveStaff(id){
     // attendance from the log — archive their id→name permanently so
     // loadLogForDate can still find their history after this point.
     if(staff) mergeIntoStaffArchive(staff.id, staff.name);
+  }catch(e){
+    showToast('削除に失敗しました');
+  }
+  // A departed staff member's photo is left in place rather than deleted —
+  // same call as staffArchive above (harmless if they're re-added, and at
+  // most a few hundred KB per person, not worth the extra risk of wiring
+  // up another delete path for something this small).
+}
+
+// One hidden <input type=file> is shared by every row in the staff list
+// (see renderSettings) rather than one per staff member, so this just
+// remembers which staff id the picker was opened for.
+let staffPhotoPickTargetId = null;
+
+function pickStaffPhoto(id){
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  staffPhotoPickTargetId = id;
+  const input = document.getElementById('staffPhotoFileInput');
+  if(input) input.click();
+}
+
+async function onStaffPhotoFileSelected(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  const id = staffPhotoPickTargetId;
+  staffPhotoPickTargetId = null;
+  if(!file || !id) return;
+  const staff = staffList.find(s=>s.id===id);
+  if(!staff || !db) return;
+  showToast('写真をアップロード中…');
+  try{
+    const dataUrl = await makeCompressedDataUrl(file, STAFF_PHOTO_ATTEMPTS, STAFF_PHOTO_MAX_CHARS);
+    if(!dataUrl){ showToast('写真の処理に失敗しました'); return; }
+    await db.doc('staffPhotos/' + id).set({ dataUrl, ts: Date.now() });
+    staffPhotos[id] = dataUrl;
+    staffPhotosLoadedAt = Date.now();
+    renderApp();
+    showToast('写真を登録しました');
+  }catch(err){
+    showToast('写真の保存に失敗しました');
+  }
+}
+
+function confirmRemoveStaffPhoto(id){
+  const staff = staffList.find(s=>s.id===id);
+  if(!staff || !db) return;
+  showConfirmModal(staff.name + ' の写真を外しますか？', ()=>doRemoveStaffPhoto(id));
+}
+
+async function doRemoveStaffPhoto(id){
+  try{
+    await db.doc('staffPhotos/' + id).set(null);
+    delete staffPhotos[id];
+    staffPhotosLoadedAt = Date.now();
+    renderApp();
   }catch(e){
     showToast('削除に失敗しました');
   }
