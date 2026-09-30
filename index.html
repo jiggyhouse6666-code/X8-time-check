@@ -277,7 +277,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-11 - 2026-09-30';
+const BUILD_STAMP = 'web-12 - 2026-09-30';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -495,6 +495,15 @@ const OTSUKARE_MESSAGES_OUT = [
 ];
 function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
+// Admin-added quotes from Settings, layered on top of the built-in arrays
+// above (which stay code-only — editing those still needs a real deploy).
+// Live-subscribed the same way staffList is, so a quote added on one device
+// shows up everywhere without a manual refresh.
+let customQuotes = { in: [], out: [] };
+let unsubCustomQuotes = null;
+function inQuotePool(){ return HYPE_MESSAGES_IN.concat(customQuotes.in || []); }
+function outQuotePool(){ return OTSUKARE_MESSAGES_OUT.concat(customQuotes.out || []); }
+
 function csvField(v){
   const s = String(v==null ? '' : v);
   if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
@@ -539,6 +548,7 @@ async function init(){
     db = { doc: makeDocRef, collection: makeCollectionRef };
   }catch(e){ db = null; rtdb = null; }
   subscribeStaff();
+  subscribeCustomQuotes();
   loadStaffPhotos();
   renderApp();
   setInterval(()=>{
@@ -557,6 +567,30 @@ function subscribeStaff(){
     (snap)=>{
       const data = snap.exists ? snap.data() : null;
       staffList = (data && Array.isArray(data.list)) ? data.list : [];
+      renderApp();
+    },
+    (err)=>{ /* keep last known list on transient error */ }
+  );
+}
+
+function subscribeCustomQuotes(){
+  if(!db) return;
+  unsubCustomQuotes = db.doc('config/customQuotes').onSnapshot(
+    (snap)=>{
+      const data = snap.exists ? snap.data() : null;
+      const next = {
+        in: (data && Array.isArray(data.in)) ? data.in : [],
+        out: (data && Array.isArray(data.out)) ? data.out : [],
+      };
+      // Skip the re-render when this echo already matches what's in memory —
+      // true for almost every echo of our OWN edit, since doAddCustomQuote/
+      // doRemoveCustomQuote already applied it optimistically. Settings has
+      // two quote forms on one screen inviting back-to-back entry, and a
+      // render here does a full main.innerHTML rebuild that would otherwise
+      // wipe out whatever the admin is mid-typing into the OTHER field the
+      // instant this device's own slow round-trip finally echoes back.
+      if(JSON.stringify(next) === JSON.stringify(customQuotes)) return;
+      customQuotes = next;
       renderApp();
     },
     (err)=>{ /* keep last known list on transient error */ }
@@ -603,6 +637,8 @@ function onAppClick(e){
   else if(action==='saveStaffName') saveStaffName(el.dataset.id);
   else if(action==='cancelEditStaffName') cancelEditStaffName();
   else if(action==='addStaff') addStaff();
+  else if(action==='addCustomQuote') addCustomQuote(el.dataset.type);
+  else if(action==='removeCustomQuote') removeCustomQuote(el.dataset.type, el.dataset.id);
   else if(action==='pickStaffPhoto') pickStaffPhoto(el.dataset.id);
   else if(action==='removeStaffPhoto') confirmRemoveStaffPhoto(el.dataset.id);
   else if(action==='dismissSuccess') dismissSuccessNow();
@@ -1020,7 +1056,7 @@ async function doCapture(){
 
   const monthKey = monthKeyOf(now);
   const dayKey = dayKeyOf(now);
-  const message = action==='in' ? pickRandom(HYPE_MESSAGES_IN) : pickRandom(OTSUKARE_MESSAGES_OUT);
+  const message = action==='in' ? pickRandom(inQuotePool()) : pickRandom(outQuotePool());
   const event = {
     id: 'ev' + now.getTime().toString(36) + Math.random().toString(36).slice(2,7),
     type:action, time:timeStrOf(now), ts: now.getTime(),
@@ -1387,6 +1423,27 @@ function renderModal(){
 }
 
 /* ---------- settings ---------- */
+function quoteListSectionHtml(type, label){
+  const ids = quoteInputIds(type);
+  const list = customQuotes[type] || [];
+  return `
+    <div style="font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px;">${label}</div>
+    <div class="row">
+      <input type="text" id="${ids.text}" placeholder="名言のテキスト">
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input type="text" id="${ids.by}" placeholder="誰の言葉か（省略可）">
+      <button class="btn gold" data-action="addCustomQuote" data-type="${type}">追加</button>
+    </div>
+    ${list.length ? list.map(q => `
+      <div class="row settings-row">
+        <div class="settings-name" style="font-weight:400;">${escapeHtml(q.text)}${q.by ? `<span style="color:var(--text-faint); font-weight:400;"> — ${escapeHtml(q.by)}</span>` : ''}</div>
+        <button class="btn small danger outline" data-action="removeCustomQuote" data-type="${type}" data-id="${escapeHtml(q.id)}">削除</button>
+      </div>
+    `).join('') : `<div class="hint" style="margin:8px 0 0;">まだ追加された名言はありません</div>`}
+  `;
+}
+
 function renderSettings(main){
   if(!db){
     main.innerHTML = '<div class="empty-hint">この端末ではデータ保存を利用できません</div>';
@@ -1424,6 +1481,13 @@ function renderSettings(main){
         <button class="btn gold" data-action="addStaff">追加</button>
       </div>
     </div>
+    <div class="section-title">名言を追加</div>
+    <div class="card">
+      <div class="hint" style="margin-bottom:14px;">出勤・退勤のあとに表示される名言を追加できます（誰の言葉かは省略できます）</div>
+      ${quoteListSectionHtml('in', '出勤用')}
+      <div style="height:1px; background:var(--border); margin:18px 0;"></div>
+      ${quoteListSectionHtml('out', '退勤用')}
+    </div>
     <div class="section-title">出退勤データの書き出し</div>
     <div class="card">
       <div class="row">
@@ -1445,6 +1509,14 @@ function renderSettings(main){
   }
   const photoInput = document.getElementById('staffPhotoFileInput');
   if(photoInput) photoInput.addEventListener('change', onStaffPhotoFileSelected);
+  ['in','out'].forEach(type=>{
+    const ids = quoteInputIds(type);
+    const submit = ()=>addCustomQuote(type);
+    const textEl = document.getElementById(ids.text);
+    const byEl = document.getElementById(ids.by);
+    if(textEl) textEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
+    if(byEl) byEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
+  });
   if(editingStaffId){
     const renameInput = document.getElementById('renameInput-' + editingStaffId);
     if(renameInput){
@@ -1612,6 +1684,66 @@ async function doRemoveStaff(id){
   // same call as staffArchive above (harmless if they're re-added, and at
   // most a few hundred KB per person, not worth the extra risk of wiring
   // up another delete path for something this small).
+}
+
+/* ---------- custom quotes (Settings) ----------
+   Admin-added quotes layered on top of HYPE_MESSAGES_IN/OTSUKARE_MESSAGES_OUT
+   (see inQuotePool/outQuotePool near those arrays). Stored as
+   config/customQuotes = { in:[{id,text,by?}], out:[...] }; .update() with a
+   single top-level key touches only that array, leaving the other type's
+   list untouched (see the doc adapter's flatten() above doCapture). */
+function genQuoteId(){ return 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+function quoteInputIds(type){
+  const suffix = type==='in' ? 'In' : 'Out';
+  return { text: 'newQuoteText' + suffix, by: 'newQuoteBy' + suffix };
+}
+
+function addCustomQuote(type){
+  const ids = quoteInputIds(type);
+  const textInput = document.getElementById(ids.text);
+  const byInput = document.getElementById(ids.by);
+  if(!textInput) return;
+  const text = textInput.value.trim();
+  if(!text){ showToast('名言のテキストを入力してください'); return; }
+  const by = byInput ? byInput.value.trim() : '';
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  doAddCustomQuote(type, text, by);
+}
+
+async function doAddCustomQuote(type, text, by){
+  const newQuote = { id: genQuoteId(), text };
+  if(by) newQuote.by = by;
+  const newList = (customQuotes[type] || []).concat([newQuote]);
+  try{
+    await db.doc('config/customQuotes').update({ [type]: newList });
+    customQuotes = Object.assign({}, customQuotes, { [type]: newList });
+    const ids = quoteInputIds(type);
+    const textInput = document.getElementById(ids.text);
+    const byInput = document.getElementById(ids.by);
+    if(textInput) textInput.value = '';
+    if(byInput) byInput.value = '';
+    renderApp();
+  }catch(e){
+    showToast('名言の追加に失敗しました');
+  }
+}
+
+function removeCustomQuote(type, id){
+  const q = (customQuotes[type] || []).find(x=>x.id===id);
+  if(!q) return;
+  showConfirmModal('「' + q.text + '」を削除しますか？', ()=>doRemoveCustomQuote(type, id));
+}
+
+async function doRemoveCustomQuote(type, id){
+  const newList = (customQuotes[type] || []).filter(x=>x.id!==id);
+  try{
+    await db.doc('config/customQuotes').update({ [type]: newList });
+    customQuotes = Object.assign({}, customQuotes, { [type]: newList });
+    renderApp();
+  }catch(e){
+    showToast('削除に失敗しました');
+  }
 }
 
 // One hidden <input type=file> is shared by every row in the staff list
