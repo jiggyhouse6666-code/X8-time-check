@@ -277,7 +277,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-12 - 2026-09-30';
+const BUILD_STAMP = 'web-14 - 2026-10-01';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -504,6 +504,22 @@ let unsubCustomQuotes = null;
 function inQuotePool(){ return HYPE_MESSAGES_IN.concat(customQuotes.in || []); }
 function outQuotePool(){ return OTSUKARE_MESSAGES_OUT.concat(customQuotes.out || []); }
 
+// Per-staff personal quote pools (config/staffQuotes/{staffId} -> [{id,text,by?}]).
+// One shared pool per staff, used for BOTH their 出勤 and 退勤 messages —
+// when a staff member has at least one personal quote assigned, it REPLACES
+// the normal shared pool for them entirely (not blended in), so a trainer
+// can put a specific trainee's clock-in/out messages on message rather than
+// leaving it to the general rotation. Staff with nothing assigned are
+// completely unaffected and keep drawing from inQuotePool()/outQuotePool()
+// exactly as before.
+let staffQuotes = {};
+let unsubStaffQuotes = null;
+function quotePoolForStaff(staffId, direction){
+  const personal = staffQuotes[staffId];
+  if(personal && personal.length) return personal;
+  return direction==='in' ? inQuotePool() : outQuotePool();
+}
+
 function csvField(v){
   const s = String(v==null ? '' : v);
   if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
@@ -549,6 +565,7 @@ async function init(){
   }catch(e){ db = null; rtdb = null; }
   subscribeStaff();
   subscribeCustomQuotes();
+  subscribeStaffQuotes();
   loadStaffPhotos();
   renderApp();
   setInterval(()=>{
@@ -597,6 +614,26 @@ function subscribeCustomQuotes(){
   );
 }
 
+function subscribeStaffQuotes(){
+  if(!db) return;
+  unsubStaffQuotes = db.doc('config/staffQuotes').onSnapshot(
+    (snap)=>{
+      const data = snap.exists ? snap.data() : null;
+      const next = {};
+      if(data){
+        for(const id in data){ if(Array.isArray(data[id])) next[id] = data[id]; }
+      }
+      // Same self-echo guard as subscribeCustomQuotes — the 個人の名言 editor
+      // also has a text field an admin could be mid-typing into when their
+      // own previous save echoes back.
+      if(JSON.stringify(next) === JSON.stringify(staffQuotes)) return;
+      staffQuotes = next;
+      renderApp();
+    },
+    (err)=>{ /* keep last known list on transient error */ }
+  );
+}
+
 /* Loads every staffPhotos/{id} dataUrl in one plain REST GET (not the
    onSnapshot/SDK path, same style as loadPhotoCount below). Not live —
    photos change rarely, and re-streaming several MB of image data to every
@@ -639,6 +676,8 @@ function onAppClick(e){
   else if(action==='addStaff') addStaff();
   else if(action==='addCustomQuote') addCustomQuote(el.dataset.type);
   else if(action==='removeCustomQuote') removeCustomQuote(el.dataset.type, el.dataset.id);
+  else if(action==='addPersonalQuote') addPersonalQuote(el.dataset.id);
+  else if(action==='removePersonalQuote') removePersonalQuote(el.dataset.staffId, el.dataset.id);
   else if(action==='pickStaffPhoto') pickStaffPhoto(el.dataset.id);
   else if(action==='removeStaffPhoto') confirmRemoveStaffPhoto(el.dataset.id);
   else if(action==='dismissSuccess') dismissSuccessNow();
@@ -1056,7 +1095,7 @@ async function doCapture(){
 
   const monthKey = monthKeyOf(now);
   const dayKey = dayKeyOf(now);
-  const message = action==='in' ? pickRandom(inQuotePool()) : pickRandom(outQuotePool());
+  const message = pickRandom(quotePoolForStaff(staff.id, action));
   const event = {
     id: 'ev' + now.getTime().toString(36) + Math.random().toString(36).slice(2,7),
     type:action, time:timeStrOf(now), ts: now.getTime(),
@@ -1444,6 +1483,31 @@ function quoteListSectionHtml(type, label){
   `;
 }
 
+// Same visual pattern as quoteListSectionHtml above, but scoped to one
+// staff id and shared between their 出勤/退勤 (see quotePoolForStaff) rather
+// than split by direction.
+function personalQuoteSectionHtml(staffId){
+  const staff = staffList.find(s=>s.id===staffId);
+  if(!staff) return '';
+  const list = staffQuotes[staffId] || [];
+  return `
+    <div style="height:1px; background:var(--border); margin:16px 0;"></div>
+    <div class="row">
+      <input type="text" id="newPersonalQuoteText" placeholder="名言のテキスト">
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input type="text" id="newPersonalQuoteBy" placeholder="誰の言葉か（省略可）">
+      <button class="btn gold" data-action="addPersonalQuote" data-id="${escapeHtml(staffId)}">追加</button>
+    </div>
+    ${list.length ? list.map(q => `
+      <div class="row settings-row">
+        <div class="settings-name" style="font-weight:400;">${escapeHtml(q.text)}${q.by ? `<span style="color:var(--text-faint); font-weight:400;"> — ${escapeHtml(q.by)}</span>` : ''}</div>
+        <button class="btn small danger outline" data-action="removePersonalQuote" data-staff-id="${escapeHtml(staffId)}" data-id="${escapeHtml(q.id)}">削除</button>
+      </div>
+    `).join('') : `<div class="hint" style="margin:8px 0 0;">${escapeHtml(staff.name)}さんの個人名言はまだありません</div>`}
+  `;
+}
+
 function renderSettings(main){
   if(!db){
     main.innerHTML = '<div class="empty-hint">この端末ではデータ保存を利用できません</div>';
@@ -1488,13 +1552,22 @@ function renderSettings(main){
       <div style="height:1px; background:var(--border); margin:18px 0;"></div>
       ${quoteListSectionHtml('out', '退勤用')}
     </div>
-    <div class="section-title">出退勤データの書き出し</div>
+    <div class="section-title">個人の名言</div>
+    <div class="card">
+      <div class="hint" style="margin-bottom:14px;">スタッフを指定すると、その人の出勤・退勤メッセージはここに追加した名言だけになります（未指定のスタッフはいつも通りランダム）</div>
+      <select id="staffQuoteTargetSelect">
+        <option value="">-- スタッフを選択 --</option>
+        ${staffList.map(s => `<option value="${escapeHtml(s.id)}" ${s.id===staffQuoteEditTargetId?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}
+      </select>
+      ${staffQuoteEditTargetId ? personalQuoteSectionHtml(staffQuoteEditTargetId) : ''}
+    </div>
+    <div class="section-title">月間サマリーの書き出し</div>
     <div class="card">
       <div class="row">
         <input type="month" id="exportMonthInput" value="${escapeHtml(monthKeyOf(new Date()))}">
       </div>
       <button class="btn gold block" id="exportExcelBtn" data-action="exportExcel" style="margin-top:10px;">Excelで書き出す</button>
-      <div class="hint" style="margin:10px 0 0;">スタッフごとにまとまった状態で、出勤・退勤の時刻が入ったCSVファイルが書き出されるよ（Excelでそのまま開けるよ）</div>
+      <div class="hint" style="margin:10px 0 0;">スタッフごとの出勤日数・合計勤務時間・平均出退勤時刻をまとめたCSVファイルが書き出されるよ（Excelでそのまま開けるよ）</div>
     </div>
     <div class="section-title">写真データ</div>
     <div class="card">
@@ -1517,6 +1590,15 @@ function renderSettings(main){
     if(textEl) textEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
     if(byEl) byEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
   });
+  const staffQuoteSelect = document.getElementById('staffQuoteTargetSelect');
+  if(staffQuoteSelect) staffQuoteSelect.addEventListener('change', onStaffQuoteTargetChange);
+  if(staffQuoteEditTargetId){
+    const submitPersonal = ()=>addPersonalQuote(staffQuoteEditTargetId);
+    const personalTextEl = document.getElementById('newPersonalQuoteText');
+    const personalByEl = document.getElementById('newPersonalQuoteBy');
+    if(personalTextEl) personalTextEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitPersonal(); });
+    if(personalByEl) personalByEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitPersonal(); });
+  }
   if(editingStaffId){
     const renameInput = document.getElementById('renameInput-' + editingStaffId);
     if(renameInput){
@@ -1746,6 +1828,81 @@ async function doRemoveCustomQuote(type, id){
   }
 }
 
+// --- 個人の名言 (per-staff personal quote pools) ---------------------------
+// Same add/remove pattern as the shared customQuotes above, but keyed by a
+// single selected staff id instead of an in/out type, and stored at
+// config/staffQuotes/{staffId} — one shared list per staff, used for both
+// their 出勤 and 退勤 messages (see quotePoolForStaff).
+let staffQuoteEditTargetId = null;
+// Guards add/remove from overlapping: both read the current staffQuotes[id]
+// synchronously and only write the result back once their own await
+// resolves, so two calls fired back-to-back (e.g. add, then immediately
+// add again before the first round-trip finishes) could each build their
+// newList from the same stale snapshot and the slower one to resolve would
+// clobber the other's write. One shared busy flag serializes them, the
+// same simple pattern already used for exportingExcel/submitting elsewhere.
+let personalQuoteBusy = false;
+function genStaffQuoteId(){ return 'sq' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+function onStaffQuoteTargetChange(){
+  const sel = document.getElementById('staffQuoteTargetSelect');
+  staffQuoteEditTargetId = (sel && sel.value) ? sel.value : null;
+  renderApp();
+}
+
+function addPersonalQuote(staffId){
+  if(!staffId || personalQuoteBusy) return;
+  const textInput = document.getElementById('newPersonalQuoteText');
+  const byInput = document.getElementById('newPersonalQuoteBy');
+  if(!textInput) return;
+  const text = textInput.value.trim();
+  if(!text){ showToast('名言のテキストを入力してください'); return; }
+  const by = byInput ? byInput.value.trim() : '';
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  doAddPersonalQuote(staffId, text, by);
+}
+
+async function doAddPersonalQuote(staffId, text, by){
+  personalQuoteBusy = true;
+  const newQuote = { id: genStaffQuoteId(), text };
+  if(by) newQuote.by = by;
+  const newList = (staffQuotes[staffId] || []).concat([newQuote]);
+  try{
+    await db.doc('config/staffQuotes').update({ [staffId]: newList });
+    staffQuotes = Object.assign({}, staffQuotes, { [staffId]: newList });
+    const textInput = document.getElementById('newPersonalQuoteText');
+    const byInput = document.getElementById('newPersonalQuoteBy');
+    if(textInput) textInput.value = '';
+    if(byInput) byInput.value = '';
+    renderApp();
+  }catch(e){
+    showToast('名言の追加に失敗しました');
+  }finally{
+    personalQuoteBusy = false;
+  }
+}
+
+function removePersonalQuote(staffId, id){
+  if(personalQuoteBusy) return;
+  const q = (staffQuotes[staffId] || []).find(x=>x.id===id);
+  if(!q) return;
+  showConfirmModal('「' + q.text + '」を削除しますか？', ()=>doRemovePersonalQuote(staffId, id));
+}
+
+async function doRemovePersonalQuote(staffId, id){
+  personalQuoteBusy = true;
+  const newList = (staffQuotes[staffId] || []).filter(x=>x.id!==id);
+  try{
+    await db.doc('config/staffQuotes').update({ [staffId]: newList });
+    staffQuotes = Object.assign({}, staffQuotes, { [staffId]: newList });
+    renderApp();
+  }catch(e){
+    showToast('削除に失敗しました');
+  }finally{
+    personalQuoteBusy = false;
+  }
+}
+
 // One hidden <input type=file> is shared by every row in the staff list
 // (see renderSettings) rather than one per staff member, so this just
 // remembers which staff id the picker was opened for.
@@ -1816,7 +1973,7 @@ async function mergeIntoStaffArchive(id, name){
   }catch(e){ /* best-effort bookkeeping — loadLogForDate still works off whatever's already archived */ }
 }
 
-/* ---------- Excel export ---------- */
+/* ---------- Excel export (月間サマリー) ---------- */
 let exportingExcel = false;
 
 // Plain browser download — no platform "save this file?" prompt to ask,
@@ -1832,6 +1989,123 @@ function browserDownload(filename, blob){
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
 
+function nextMonthKey(monthKey){
+  const parts = monthKey.split('-').map(Number);
+  const d = new Date(parts[0], parts[1], 1); // parts[1] is 1-12; used as a 0-based month index this lands on next month
+  return d.getFullYear() + '-' + pad2(d.getMonth()+1);
+}
+
+// "HH:MM" -> minutes since midnight, or null if not parseable.
+function toMinutesOfDay(timeStr){
+  if(typeof timeStr !== 'string') return null;
+  const m = timeStr.match(/^(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  return parseInt(m[1],10)*60 + parseInt(m[2],10);
+}
+
+// Reverse of the above, wrapping into a normal 0:00-23:59 clock time. The
+// input can be fractional (an average) or beyond 1440 (a shifted
+// late-night value — see computeStaffMonthSummary below).
+function minutesToClockStr(mins){
+  let m = Math.round(mins) % 1440;
+  if(m < 0) m += 1440;
+  return pad2(Math.floor(m/60)) + ':' + pad2(m%60);
+}
+
+// Every (non-deleted) in/out event for one staff member's whole month doc,
+// flattened out of its day buckets, each tagged with the calendar date it
+// actually happened on.
+async function fetchMonthEventsFlat(staffId, monthKey){
+  let data = null;
+  try{
+    const snap = await db.doc('attendance/' + staffId + '_' + monthKey).get();
+    data = snap.exists ? snap.data() : null;
+  }catch(e){ data = null; }
+  const days = (data && data.days) || {};
+  const out = [];
+  Object.keys(days).forEach(dayKey=>{
+    const events = (days[dayKey] && Array.isArray(days[dayKey].events)) ? days[dayKey].events : [];
+    events.forEach(ev=>{
+      if(ev.deleted) return;
+      if(typeof ev.ts !== 'number' || (ev.type!=='in' && ev.type!=='out')) return;
+      out.push({ ts: ev.ts, time: ev.time, type: ev.type, dateStr: monthKey + '-' + dayKey });
+    });
+  });
+  return out;
+}
+
+// Pairs up 出勤/退勤 events into shifts and rolls them into one month's
+// summary for one staff member. A host-club shift routinely runs past
+// midnight, so a day-bucketed "just group by calendar day" approach (what
+// the previous export deliberately avoided entirely) would misattribute or
+// drop the back half of a late shift — instead this also pulls in the
+// FOLLOWING month's events, walks everything in one chronological list,
+// and pairs each 出勤 with the next 退勤 that follows it, wherever its own
+// calendar date lands. A shift is credited to the month its 出勤 happened
+// in; an 退勤 with no preceding open 出勤 in this window belongs to a shift
+// that started before it (i.e. in the previous month) and is correctly
+// skipped here rather than double-counted, since that earlier month's own
+// summary already accounts for it.
+async function computeStaffMonthSummary(staffId, monthKey){
+  const [evThis, evNext] = await Promise.all([
+    fetchMonthEventsFlat(staffId, monthKey),
+    fetchMonthEventsFlat(staffId, nextMonthKey(monthKey)),
+  ]);
+  const all = evThis.map(e=>Object.assign({}, e, { inRange:true }))
+    .concat(evNext.map(e=>Object.assign({}, e, { inRange:false })))
+    .sort((a,b)=>a.ts-b.ts);
+
+  const shifts = [];
+  let openIn = null;
+  all.forEach(ev=>{
+    if(ev.type === 'in'){
+      // A dangling 出勤 with no 退勤 before the next 出勤 shows up is still a
+      // real (incomplete) shift — flagged via outEv:null below, not
+      // silently dropped.
+      if(openIn && openIn.inRange) shifts.push({ inEv: openIn, outEv: null });
+      openIn = ev;
+    } else {
+      if(openIn){
+        if(openIn.inRange) shifts.push({ inEv: openIn, outEv: ev });
+        openIn = null;
+      }
+    }
+  });
+  if(openIn && openIn.inRange) shifts.push({ inEv: openIn, outEv: null });
+
+  const relevant = shifts.filter(s => s.inEv.inRange);
+  const daysWorked = new Set(relevant.map(s=>s.inEv.dateStr));
+  const inMinutes = [];
+  const outMinutesShifted = [];
+  let totalMinutes = 0;
+  let openCount = 0;
+
+  relevant.forEach(s=>{
+    const inM = toMinutesOfDay(s.inEv.time);
+    if(inM !== null) inMinutes.push(inM);
+    if(s.outEv){
+      // Clock-outs cluster in the small hours (host-club closing time), so
+      // a plain average would wrongly blend e.g. "01:30" with "23:45" into
+      // a meaningless early-afternoon figure — shift anything before noon
+      // by +24h before averaging, then wrap back for display.
+      const outM = toMinutesOfDay(s.outEv.time);
+      if(outM !== null) outMinutesShifted.push(outM < 720 ? outM + 1440 : outM);
+      if(s.outEv.ts > s.inEv.ts) totalMinutes += Math.round((s.outEv.ts - s.inEv.ts) / 60000);
+    } else {
+      openCount++;
+    }
+  });
+
+  return {
+    daysWorked: daysWorked.size,
+    totalHoursDecimal: Math.round((totalMinutes/60) * 10) / 10,
+    totalHoursLabel: Math.floor(totalMinutes/60) + '時間' + (totalMinutes%60) + '分',
+    avgIn: inMinutes.length ? minutesToClockStr(inMinutes.reduce((a,b)=>a+b,0)/inMinutes.length) : '',
+    avgOut: outMinutesShifted.length ? minutesToClockStr(outMinutesShifted.reduce((a,b)=>a+b,0)/outMinutesShifted.length) : '',
+    openCount,
+  };
+}
+
 async function exportAttendanceExcel(){
   if(exportingExcel) return;
   const monthInput = document.getElementById('exportMonthInput');
@@ -1844,41 +2118,42 @@ async function exportAttendanceExcel(){
   if(btn){ btn.disabled = true; btn.textContent = '書き出し中…'; }
 
   try{
-    // Every event, per staff member, for the selected month — one flat
-    // chronological log per person (grouped by staff, so each person's
-    // rows sit together) rather than paired shifts, since a late-night
-    // shift can cross midnight into the next day bucket and guessing at
-    // pairing could show a wrong worked-hours figure.
-    const allRows = [];
+    // One row per staff member who actually worked this month — 出勤日数・
+    // 合計勤務時間・平均出退勤時刻・退勤未記録日数 — in place of the old flat
+    // per-event log.
+    const rows = [];
     for(const s of staffList){
-      let data = null;
-      try{
-        const snap = await db.doc('attendance/' + s.id + '_' + monthKey).get();
-        data = snap.exists ? snap.data() : null;
-      }catch(e){ data = null; }
-      const days = (data && data.days) || {};
-      Object.keys(days).sort().forEach(dayKey=>{
-        const events = (days[dayKey] && Array.isArray(days[dayKey].events)) ? days[dayKey].events.slice() : [];
-        events.sort((a,b)=>a.ts-b.ts).forEach(ev=>{
-          allRows.push({ staffName: s.name, date: monthKey + '-' + dayKey, time: ev.time, type: ev.type==='in' ? '出勤' : '退勤' });
-        });
-      });
+      const summary = await computeStaffMonthSummary(s.id, monthKey);
+      if(summary.daysWorked === 0) continue;
+      rows.push(Object.assign({ staffName: s.name }, summary));
     }
 
-    if(!allRows.length){
+    if(!rows.length){
       showToast('この月の記録はありません');
       return;
     }
 
     // Plain CSV: Excel opens this natively, and it needs no extra library
     // or network fetch to build (unlike a real .xlsx), so there's nothing
-    // that can hang while generating it.
-    const header = ['スタッフ','日付','時刻','区分'];
+    // that can hang while generating it. totalHoursDecimal is a plain
+    // number field so Excel treats it as a real number (時給 × this column
+    // works immediately), not text.
+    const header = ['スタッフ','出勤日数','合計勤務時間(時間)','合計勤務時間','平均出勤時刻','平均退勤時刻','退勤未記録日数'];
     const lines = [header.map(csvField).join(',')];
-    allRows.forEach(r=>{ lines.push([r.staffName, r.date, r.time, r.type].map(csvField).join(',')); });
+    rows.forEach(r=>{
+      lines.push([
+        r.staffName, r.daysWorked, r.totalHoursDecimal, r.totalHoursLabel,
+        r.avgIn, r.avgOut, r.openCount,
+      ].map(csvField).join(','));
+    });
     const csvText = '﻿' + lines.join('\r\n') + '\r\n';
     const blob = new Blob([csvText], { type:'text/csv' });
-    const filename = 'X8_出退勤_' + monthKey + '.csv';
+    // ASCII-only filename: Chromium silently renames a blob-download's
+    // saved file to a generic "download" when the <a download> attribute
+    // contains Japanese characters (a real browser quirk, not specific to
+    // any one machine) — the CSV's own content is still fully Japanese,
+    // only the filename on disk is kept romaji so it always saves correctly.
+    const filename = 'X8_monthly_summary_' + monthKey + '.csv';
 
     browserDownload(filename, blob);
   }catch(e){
