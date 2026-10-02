@@ -161,7 +161,7 @@ input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .btn.outbtn{background:var(--indigo); border-color:var(--indigo); color:#fff;}
 
 /* ===== success overlay ===== */
-.success-wrap{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center;}
+.success-wrap{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; min-height:100%; cursor:pointer;}
 .success-check{
   width:74px; height:74px; border-radius:50%; background:var(--success-soft); border:2px solid var(--success);
   display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--success); margin-bottom:16px;
@@ -173,6 +173,7 @@ input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .success-message.hype{background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold);}
 .success-message.otsukare{background:var(--surface2); color:var(--text-dim); border:1px solid var(--border); font-weight:600;}
 .success-message-by{margin-top:7px; font-size:11.5px; font-weight:700; letter-spacing:0.5px; opacity:0.75; text-align:right;}
+.success-tap-hint{margin:26px 0 0;}
 
 /* ===== log ===== */
 .log-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
@@ -277,7 +278,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-16 - 2026-10-01';
+const BUILD_STAMP = 'web-17 - 2026-10-02';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -1159,14 +1160,15 @@ function renderClockSuccess(main){
   // これまで通り名前つきで表示）。
   const showBy = quoted && successInfo.action !== 'in';
   main.innerHTML = `
-    <div class="success-wrap">
+    <div class="success-wrap" data-action="dismissSuccess">
       <div class="success-check">✓</div>
       <div class="success-name">${escapeHtml(successInfo.name)}</div>
       <div class="success-detail">${successInfo.action==='in' ? '出勤' : '退勤'}　${successInfo.time}</div>
-      <div class="success-message ${successInfo.action==='in' ? 'hype' : 'otsukare'}" data-action="dismissSuccess">
+      <div class="success-message ${successInfo.action==='in' ? 'hype' : 'otsukare'}">
         <div>${quoted ? '“' : ''}${escapeHtml(successInfo.message)}${quoted ? '”' : ''}</div>
         ${showBy ? `<div class="success-message-by">— ${escapeHtml(successInfo.messageBy)}</div>` : ''}
       </div>
+      <div class="hint success-tap-hint">画面をタップすると戻ります</div>
     </div>
   `;
 }
