@@ -278,7 +278,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-17 - 2026-10-02';
+const BUILD_STAMP = 'web-18 - 2026-10-02';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -391,10 +391,10 @@ const STAFF_PHOTOS_REFRESH_MS = 10 * 60 * 1000;
 
 // Gate on the ログ (log/history, with photos) and 設定 (staff list, export)
 // tabs, so the shared clock-in device can sit out for anyone to tap 打刻
-// without also exposing everyone's history. Resets on reload — it's a
+// without also exposing everyone's history. Asked fresh every single time
+// either tab is entered (no "stays unlocked" session state) — it's a
 // deterrent for casual staff, not real access control.
 const MANAGEMENT_PASSWORD = '6666';
-let managementUnlocked = false;
 
 let tab = 'clock';
 let clockView = 'select';
@@ -707,8 +707,8 @@ function dismissSuccessNow(){
 
 function switchTab(t){
   if(t===tab) return;
-  if((t==='log' || t==='settings') && !managementUnlocked){
-    showPasswordModal(()=>{ managementUnlocked = true; doSwitchTab(t); });
+  if(t==='log' || t==='settings'){
+    showPasswordModal(()=>{ doSwitchTab(t); });
     return;
   }
   doSwitchTab(t);
