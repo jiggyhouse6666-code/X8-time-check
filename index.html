@@ -120,7 +120,11 @@ input[type=text], input[type=month]{
   padding:10px 12px; font-size:14px; font-family:inherit; width:100%;
 }
 input[type=month]{ color-scheme:dark; }
-input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+select{
+  background:var(--bg-elev); border:1px solid var(--border); color:var(--text); border-radius:9px;
+  padding:9px 10px; font-size:13px; font-family:inherit; width:100%; color-scheme:dark;
+}
+input:focus, select:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .empty-hint{color:var(--text-faint); font-size:12.5px; text-align:center; padding:26px 10px; border:1px dashed var(--border); border-radius:var(--radius);}
 ::-webkit-scrollbar{width:0; height:0;}
 
@@ -232,6 +236,15 @@ input:focus{outline:2px solid var(--gold); outline-offset:1px;}
 .staff-dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto;}
 .settings-name{flex:1 1 auto; font-size:14px; font-weight:600;}
 
+/* ===== bulk staff photo change (設定 > まとめて写真を変更) ===== */
+.bulk-photo-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+.bulk-photo-row:last-child{border-bottom:none;}
+.bulk-photo-row.unassigned{background:var(--gold-soft); margin:0 -8px; padding:9px 8px; border-radius:9px; border-bottom-color:transparent;}
+.bulk-photo-thumb{width:46px; height:46px; border-radius:9px; object-fit:cover; flex:0 0 auto; border:1px solid var(--border);}
+.bulk-photo-body{flex:1 1 auto; min-width:0;}
+.bulk-photo-filename{font-size:11.5px; color:var(--text-faint); margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bulk-photo-remove{flex:0 0 auto;}
+
 /* ===== toast ===== */
 #toast{
   position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(20px);
@@ -281,7 +294,7 @@ import {
   onValue as fbOnValue
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-const BUILD_STAMP = 'web-20 - 2026-10-06';
+const BUILD_STAMP = 'web-21 - 2026-10-09';
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDfHz5djZU4ZsJKY9DsfQOJt3D7pdSOHqU",
@@ -691,6 +704,11 @@ function onAppClick(e){
   else if(action==='removePersonalQuote') removePersonalQuote(el.dataset.staffId, el.dataset.id);
   else if(action==='pickStaffPhoto') pickStaffPhoto(el.dataset.id);
   else if(action==='removeStaffPhoto') confirmRemoveStaffPhoto(el.dataset.id);
+  else if(action==='openBulkPhoto') openBulkPhoto();
+  else if(action==='closeBulkPhoto') closeBulkPhoto();
+  else if(action==='pickBulkPhotoFiles') pickBulkPhotoFiles();
+  else if(action==='removeBulkPhotoItem') removeBulkPhotoItem(Number(el.dataset.idx));
+  else if(action==='saveBulkPhotos') saveBulkPhotos();
   else if(action==='dismissSuccess') dismissSuccessNow();
   else if(action==='exportExcel') exportAttendanceExcel();
   else if(action==='modalCancel') closeModal();
@@ -1599,8 +1617,20 @@ function renderSettings(main){
     main.innerHTML = '<div class="empty-hint">この端末ではデータ保存を利用できません</div>';
     return;
   }
+  if(bulkPhotoMode){
+    main.innerHTML = bulkPhotoHtml();
+    const bulkInput = document.getElementById('bulkPhotoFileInput');
+    if(bulkInput) bulkInput.addEventListener('change', onBulkPhotoFilesSelected);
+    document.querySelectorAll('[data-action="assignBulkPhoto"]').forEach(sel=>{
+      sel.addEventListener('change', ()=>setBulkPhotoAssign(Number(sel.dataset.idx), sel.value));
+    });
+    return;
+  }
   main.innerHTML = `
-    <div class="section-title">スタッフ一覧</div>
+    <div class="section-title" style="display:flex; align-items:center; justify-content:space-between;">
+      <span>スタッフ一覧</span>
+      ${staffList.length ? `<button class="btn ghost small" data-action="openBulkPhoto">まとめて写真を変更</button>` : ''}
+    </div>
     <div class="card">
       ${staffList.length ? `
         <div class="hint" style="margin-bottom:10px;">丸いアイコンをタップすると宣材写真を登録できます</div>
@@ -2038,6 +2068,157 @@ async function doRemoveStaffPhoto(id){
   }catch(e){
     showToast('削除に失敗しました');
   }
+}
+
+/* ===== bulk staff photo change ("まとめて写真を変更") ===============
+   Lets the admin pick several photo files in one native file-picker
+   instead of tapping each staff avatar one at a time. Each picked file
+   gets a live local preview (an object URL — no Firebase write yet) and
+   a per-row dropdown assigning it to one staff member; "保存" then runs
+   every assigned file through the exact same compression + staffPhotos/
+   write path pickStaffPhoto's single-photo flow already uses, one at a
+   time, so this never becomes a second, divergent upload implementation.
+   Filename is only ever used as a same-session GUESS to pre-select a
+   dropdown option (exact match on the filename's stem, or — only when
+   unambiguous — a same-length-2+ substring match); it is never written
+   anywhere, and the admin can repoint any row before saving. When two+
+   staff share one name, that name alone can't disambiguate a filename
+   match, so the guess is deliberately left blank for the admin to pick
+   by hand — and each such row's dropdown options get a (写真あり/写真な
+   し) suffix so the two same-named entries can actually be told apart. */
+let bulkPhotoMode = false;
+let bulkPhotoItems = [];   // [{file, previewUrl, assignedId}] — assignedId is a staffList id or null (skip)
+let bulkPhotoSaving = false;
+
+function guessStaffIdForFilename(filename){
+  const stem = String(filename || '').replace(/\.[^.]+$/, '').trim();
+  if(!stem) return null;
+  const exact = staffList.filter(s=>s.name===stem);
+  if(exact.length===1) return exact[0].id;
+  if(exact.length>1) return null; // duplicate name — ambiguous, let the admin pick
+  const contains = staffList.filter(s=>s.name && s.name.length>=2 && stem.includes(s.name));
+  if(contains.length===1) return contains[0].id;
+  return null;
+}
+
+function openBulkPhoto(){
+  if(!db){ showToast('データ保存を利用できません'); return; }
+  bulkPhotoMode = true;
+  bulkPhotoItems = [];
+  bulkPhotoSaving = false;
+  renderApp();
+}
+function revokeBulkPhotoPreviews(){
+  bulkPhotoItems.forEach(it=>{ try{ URL.revokeObjectURL(it.previewUrl); }catch(e){} });
+}
+function closeBulkPhoto(){
+  revokeBulkPhotoPreviews();
+  bulkPhotoMode = false;
+  bulkPhotoItems = [];
+  bulkPhotoSaving = false;
+  renderApp();
+}
+function pickBulkPhotoFiles(){
+  const input = document.getElementById('bulkPhotoFileInput');
+  if(input) input.click();
+}
+function onBulkPhotoFilesSelected(e){
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if(!files.length) return;
+  const newItems = files.map(file=>({
+    file,
+    previewUrl: URL.createObjectURL(file),
+    assignedId: guessStaffIdForFilename(file.name)
+  }));
+  bulkPhotoItems = bulkPhotoItems.concat(newItems);
+  renderApp();
+}
+function setBulkPhotoAssign(idx, staffId){
+  const item = bulkPhotoItems[idx];
+  if(!item) return;
+  item.assignedId = staffId || null;
+  renderApp();
+}
+function removeBulkPhotoItem(idx){
+  const item = bulkPhotoItems[idx];
+  if(!item) return;
+  try{ URL.revokeObjectURL(item.previewUrl); }catch(e){}
+  bulkPhotoItems.splice(idx, 1);
+  renderApp();
+}
+async function saveBulkPhotos(){
+  if(!db || bulkPhotoSaving) return;
+  const targets = bulkPhotoItems.filter(it=>it.assignedId);
+  if(!targets.length){ showToast('割り当て先が選ばれていません'); return; }
+  const skippedCount = bulkPhotoItems.length - targets.length;
+  bulkPhotoSaving = true;
+  renderApp();
+  let okCount = 0, failCount = 0;
+  for(const item of targets){
+    try{
+      const dataUrl = await makeCompressedDataUrl(item.file, STAFF_PHOTO_ATTEMPTS, STAFF_PHOTO_MAX_CHARS);
+      if(!dataUrl){ failCount++; continue; }
+      await db.doc('staffPhotos/' + item.assignedId).set({ dataUrl, ts: Date.now() });
+      staffPhotos[item.assignedId] = dataUrl;
+      okCount++;
+    }catch(e){ failCount++; }
+  }
+  staffPhotosLoadedAt = Date.now();
+  revokeBulkPhotoPreviews();
+  bulkPhotoMode = false;
+  bulkPhotoItems = [];
+  bulkPhotoSaving = false;
+  renderApp();
+  let msg = okCount + '件の写真を更新しました';
+  if(failCount) msg += '（' + failCount + '件は失敗）';
+  if(skippedCount) msg += '（' + skippedCount + '件は未割り当てのためスキップ）';
+  showToast(msg);
+}
+function bulkPhotoHtml(){
+  const nameCounts = {};
+  staffList.forEach(s=>{ nameCounts[s.name] = (nameCounts[s.name] || 0) + 1; });
+  const assignedCount = bulkPhotoItems.filter(it=>it.assignedId).length;
+  return `
+    <div class="section-title" style="display:flex; align-items:center; justify-content:space-between;">
+      <span>まとめて写真を変更</span>
+      <button class="btn ghost small" data-action="closeBulkPhoto">✕ 閉じる</button>
+    </div>
+    <div class="card">
+      <div class="hint" style="margin-bottom:10px;">
+        写真を複数選ぶと、ファイル名がスタッフ名と一致する人に自動で割り当てます。割り当て先は下のプルダウンで一人ずつ変更・解除できます。
+      </div>
+      <button class="btn gold block" data-action="pickBulkPhotoFiles">写真を選択（複数可）</button>
+      <input type="file" accept="image/*" multiple id="bulkPhotoFileInput" class="visually-hidden-file">
+    </div>
+    ${bulkPhotoItems.length ? `
+      <div class="card">
+        ${bulkPhotoItems.map((item, i)=>{
+          const unassigned = !item.assignedId;
+          return `
+          <div class="row bulk-photo-row${unassigned ? ' unassigned' : ''}">
+            <img class="bulk-photo-thumb" src="${item.previewUrl}" alt="">
+            <div class="bulk-photo-body">
+              <div class="bulk-photo-filename">${escapeHtml(item.file.name)}</div>
+              <select data-action="assignBulkPhoto" data-idx="${i}">
+                <option value="">— 割り当てない —</option>
+                ${staffList.map(s=>{
+                  const dup = nameCounts[s.name] > 1;
+                  const label = s.name + (dup ? (staffPhotos[s.id] ? '（写真あり）' : '（写真なし）') : '');
+                  return `<option value="${escapeHtml(s.id)}" ${item.assignedId===s.id ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+                }).join('')}
+              </select>
+            </div>
+            <button class="btn ghost small icon-only bulk-photo-remove" data-action="removeBulkPhotoItem" data-idx="${i}" title="このファイルを除外">✕</button>
+          </div>
+        `;
+        }).join('')}
+      </div>
+      <button class="btn gold block" data-action="saveBulkPhotos" ${bulkPhotoSaving ? 'disabled' : ''}>
+        ${bulkPhotoSaving ? '保存中…' : '一括で保存（' + assignedCount + '件）'}
+      </button>
+    ` : ''}
+  `;
 }
 
 // A permanent id→name record of every staff member who has ever existed,
